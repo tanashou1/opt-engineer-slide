@@ -1,0 +1,66 @@
+[
+  {
+    "file": "cars.jpg",
+    "alt": "BMW 218dの車体",
+    "caption": "BMW 218d（参考写真）",
+    "author": "Vauxford",
+    "source": "https://commons.wikimedia.org/wiki/File:2017_BMW_218d_Luxury_Automatic_2.0.jpg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
+  },
+  {
+    "file": "places.jpg",
+    "alt": "ビーナスラインから望む山並みと道路",
+    "caption": "長野・ビーナスライン",
+    "author": "Douglaspperkins",
+    "source": "https://commons.wikimedia.org/wiki/File:Venus_Line_02.jpg",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  {
+    "file": "work.jpg",
+    "alt": "ヤマト運輸の配送車",
+    "caption": "ヤマト運輸の配送車（参考写真）",
+    "author": "Comyu",
+    "source": "https://commons.wikimedia.org/wiki/File:Yamato_Transport_L0301_Fuso_eCanter.jpg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
+  },
+  {
+    "file": "engineering.jpg",
+    "alt": "北海道に並ぶ風力発電の風車",
+    "caption": "北海道の風力発電",
+    "author": "夢の散歩",
+    "source": "https://commons.wikimedia.org/wiki/File:Electricity_generating_windmills_in_Hokkaido.jpg",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/"
+  },
+  {
+    "file": "music.jpg",
+    "alt": "Vulfpeckのライブ演奏",
+    "caption": "Vulfpeckのライブ",
+    "author": "EvanLBerent",
+    "source": "https://commons.wikimedia.org/wiki/File:Vulfpeck-at-rockwood-october-4-2013.jpg",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/"
+  },
+  {
+    "file": "games.jpg",
+    "alt": "将棋盤と駒",
+    "caption": "将棋盤と駒",
+    "author": "Oliver Orschiedt",
+    "source": "https://commons.wikimedia.org/wiki/File:Shogi_board_pieces_and_komadai.jpg",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/"
+  },
+  {
+    "file": "manga.webp",
+    "alt": "漫画『BLUE GIANT』第1巻の表紙",
+    "caption": "『BLUE GIANT』第1巻",
+    "author": "石塚真一／小学館",
+    "source": "https://e-comi.shogakukan.co.jp/books/091856780000d0000000",
+    "license": "",
+    "licenseUrl": null,
+    "cover": true
+  }
+]

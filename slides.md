@@ -2,17 +2,14 @@
 theme: seriph
 class: hero-slide
 layout: default
-title: 好きから仕事まで、最適化でつなぐ
+title: 自己紹介と競技プログラミング
 info: 自己紹介と、競技プログラミングから見るアルゴリズム・最適化の話
 transition: fade
 mdc: true
 ---
 
 <div class="hero-wrap">
-  <div class="hero-kicker">自己紹介 · 競技プログラミング · 最適化</div>
-  <h1 class="hero-title">好きから仕事まで、<br><span>最適化でつなぐ。</span></h1>
-  <p class="hero-subtitle">計算して、つくって、よりよい答えを探す。</p>
-  <div class="hero-meta"><span>01</span><i></i><span>INTRODUCTION</span></div>
+  <h1 class="hero-title">自己紹介と<br><span>競技プログラミング</span></h1>
   <div class="hero-orbit orbit-one"></div><div class="hero-orbit orbit-two"></div>
   <div class="hero-dot dot-one"></div><div class="hero-dot dot-two"></div>
 </div>
@@ -22,39 +19,29 @@ mdc: true
 -->
 
 ---
-layout: two-cols
-class: profile-slide
+class: profile-only-slide
+title: 自己紹介
 ---
 
-<div class="profile-copy">
-  <p class="eyebrow">ABOUT ME</p>
-  <h1>自己紹介</h1>
-  <p class="profile-lead">現実の課題を、<br><strong>数式とコード</strong>で解いてきました。</p>
-  <div class="career-line">
-    <div><span>01</span><b>東芝</b></div><i></i>
-    <div><span>02</span><b>みずほ情報総研</b></div><i></i>
-    <div><span>03</span><b>クロネコヤマト</b></div>
+<div class="profile-intro">
+  <div class="profile-history">
+    <h1>田中翔一</h1>
+    <ol class="career-timeline" aria-label="経歴">
+      <li><time>1989</time><span>生まれ</span></li>
+      <li><time>2008～2014年</time><span>筑波大学・筑波大学院</span></li>
+      <li><time>2014～2017年</time><span>東芝</span></li>
+      <li><time>2018～2020年</time><span>みずほ情報総研</span></li>
+      <li><time>2021～2023年</time><span>クロネコヤマト</span></li>
+      <li><time>2024年3月</time><span>アルゴリズムGr</span></li>
+    </ol>
   </div>
-  <p class="profile-foot">計算・最適化・ソフトウェアを行き来する仕事。</p>
-</div>
-
-::right::
-
-<div class="portrait-frame">
   <img src="https://recruit.toyota/img/interview/main/134@2x.jpg" alt="プロフィール写真" />
-  <div class="portrait-caption"><span>PROFILE</span><b>仕事も、遊びも、解く。</b></div>
-  <div class="portrait-index">02 / 12</div>
 </div>
 
 ---
 class: interest-slide
+title: Interest Map
 ---
-
-<div class="section-head">
-  <p class="eyebrow">INTEREST MAP</p>
-  <h1>興味の地図を、ひらく。</h1>
-  <p>枝をクリックして拡大。さらに小さな枝へ、興味をたどれます。</p>
-</div>
 
 <InterestMap />
 
@@ -64,11 +51,8 @@ class: section-divider
 
 <div class="chapter-number">02</div>
 <div class="chapter-content">
-  <p class="eyebrow">FROM PROBLEM TO ALGORITHM</p>
-  <h1>競技プログラミングで<br><span>「解き方」を考える。</span></h1>
-  <p>小さな問題から、答えのない最適化まで。</p>
+  <h1>競技プログラミング</h1>
 </div>
-<div class="chapter-stamp">THINK<br>·<br>BUILD<br>·<br>IMPROVE</div>
 
 ---
 class: problem-slide
@@ -76,10 +60,10 @@ class: problem-slide
 
 <div class="section-head compact">
   <p class="eyebrow">PROBLEM 01 · コーディング試験のような問題</p>
-  <h1>合計が300になる、2つの数字は？</h1>
+  <h1>雨が降ると、水は何マスたまる？</h1>
 </div>
 
-<TwoSumDiagram />
+<RainwaterDiagram />
 
 ---
 layout: two-cols
@@ -87,32 +71,38 @@ class: code-slide
 layoutClass: code-columns
 ---
 
-<p class="eyebrow">ONE PASS · HASH SET</p>
+<p class="eyebrow">LINEAR TIME · TWO SCANS</p>
 
-# 相方を探しながら進む。
+# 左右の壁を見れば、数えられる。
 
 ```python
-def find_pair(numbers, target):
-    seen = set()
-    for x in numbers:
-        need = target - x
-        if need in seen:
-            return (need, x)
-        seen.add(x)
-    return None
+def trapped_water(h):
+    left = []
+    peak = 0
+    for x in h:
+        peak = max(peak, x)
+        left.append(peak)
+    water = right = 0
+    for i in range(len(h)-1, -1, -1):
+        right = max(right, h[i])
+        water += min(left[i], right) - h[i]
+    return water
 ```
 
-<div class="code-example">find_pair([420, 130, 250, 170], 300)<br><strong>→ (130, 170)</strong></div>
+<div class="code-example">trapped_water([3, 0, 2, 0, 4]) <strong>→ 7</strong></div>
 
 ::right::
 
 <div class="trace-panel">
-  <p class="eyebrow">処理の流れ</p>
-  <div class="trace-row"><b>420</b><span>−120 はない</span><small>420 を記憶</small></div>
-  <div class="trace-row"><b>130</b><span>170 はない</span><small>130 を記憶</small></div>
-  <div class="trace-row"><b>250</b><span>50 はない</span><small>250 を記憶</small></div>
-  <div class="trace-row found"><b>170</b><span>130 がある！</span><small>ペアが見つかる</small></div>
-  <div class="trace-complexity"><b>平均 O(n)</b><span>集合で「見たか？」を確認<br>追加メモリは O(n)</span></div>
+  <p class="eyebrow">各マスで水位を求める</p>
+  <div class="water-formula">水の高さ =<br><strong>min(左の最高, 右の最高) − 建物の高さ</strong></div>
+  <div class="water-trace" aria-label="建物の高さと各マスの水の量">
+    <div><span>建物</span><b>3</b><b>0</b><b>2</b><b>0</b><b>4</b></div>
+    <div><span>左の最高</span><b>3</b><b>3</b><b>3</b><b>3</b><b>4</b></div>
+    <div><span>右の最高</span><b>4</b><b>4</b><b>4</b><b>4</b><b>4</b></div>
+    <div class="water-result"><span>水</span><b>0</b><b>3</b><b>1</b><b>3</b><b>0</b></div>
+  </div>
+  <div class="trace-complexity"><b>O(n)</b><span>左から1回、右から1回。<br>追加メモリ O(n)</span></div>
 </div>
 
 ---
@@ -138,7 +128,6 @@ class: demo-intro
     <i></i><i></i><i></i><i></i><i class="p-tile"></i><i class="p-tile"></i>
     <i class="p-wall"></i><i></i><i></i><i></i><i></i><i></i>
   </div>
-  <div class="preview-caption"><span class="pulse-dot"></span> PLACE · SOLVE · REPEAT</div>
 </div>
 
 ---
@@ -168,11 +157,23 @@ class: ahc-slide
 
 <div class="section-head compact">
   <p class="eyebrow">PROBLEM 03 · LONG-TERM AHC</p>
-  <h1>正解がひとつではない問題。</h1>
-  <p>配送ルートを例に、候補をつくり、評価して、更新する。（説明用の模式図）</p>
+  <h1>注文が増えるたび、配送計画を組み直す。</h1>
+  <p>複数車両・時間帯・積載量・勤務時間。道路と注文も途中で変わる。（架空の設定）</p>
 </div>
 
-<HeuristicDiagram />
+<DispatchChallenge />
+
+---
+class: ahc-slide
+---
+
+<div class="section-head compact">
+  <p class="eyebrow">PROBLEM 03 · SEARCH AND TRADE-OFFS</p>
+  <h1>短いルートが、よい計画とは限らない。</h1>
+  <p>遅配や残業も評価しながら、限られた時間で候補を改善する。（数値は模式例）</p>
+</div>
+
+<DispatchStrategy />
 
 ---
 class: tech-slide
@@ -181,13 +182,54 @@ class: tech-slide
 <TechMap />
 
 ---
+class: section-divider
+---
+
+<div class="chapter-number">03</div>
+<div class="chapter-content">
+  <h1>AI時代の<br><span>数理最適化エンジニア。</span></h1>
+</div>
+
+---
+class: ai-progress-slide
+---
+
+<div class="section-head compact">
+  <p class="eyebrow">AI CAPABILITY · ALE-BENCH</p>
+  <h1>生成AIは、どこまで来たか。</h1>
+  <p>AHC由来の最適化問題で比較。公開日を動かすと、モデルの実力の変化が見える。</p>
+</div>
+
+<AiProgress />
+
+---
+class: value-slide
+---
+
+<div class="section-head compact">
+  <p class="eyebrow">VALUE 01 · MODEL THE REAL WORLD</p>
+  <h1>現実を、解ける形にする。</h1>
+  <p>情報をただ集めるだけではなく、目的と制約を設計する。</p>
+</div>
+
+<OptimizationValue phase="model" />
+
+---
+class: value-slide
+---
+
+<div class="section-head compact">
+  <p class="eyebrow">VALUE 02 · DECIDE AND ACT</p>
+  <h1>解が出た後に、意思決定がある。</h1>
+  <p>計算結果を使って選び、意志をもって進めていく。</p>
+</div>
+
+<OptimizationValue phase="decision" />
+
+---
 class: closing-slide
 ---
 
-<div class="closing-mark">FIN</div>
-<p class="eyebrow">TAKEAWAY</p>
-<h1>解き方を考える。<br><span>つくって、測って、よくする。</span></h1>
-<div class="closing-points"><span>アルゴリズム</span><i></i><span>最適化</span><i></i><span>実験</span></div>
+<h1>まとめ</h1>
+<div class="closing-points"><span>モデリング</span><i></i><span>最適化</span><i></i><span>意思決定</span></div>
 <p class="closing-thanks">ご清聴ありがとうございました</p>
-
-

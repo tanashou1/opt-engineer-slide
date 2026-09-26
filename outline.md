@@ -1,6 +1,17 @@
+# タイトル
+数理最適化エンジニアの価値
 # 自己紹介
 ## 顔
 https://recruit.toyota/img/interview/main/134@2x.jpg
+
+### 年表
+1989 生まれ
+2008～2014年 筑波大学・筑波大学院
+2014～2017年 東芝
+2018～2020年 みずほ情報総研
+2021～2023年 クロネコヤマト
+2024年3月 アルゴリズムGr
+
 ## Interest Map
 領域を拡大すると画像など出てくるようなインタラクティブなものにする
 - 車
@@ -78,8 +89,9 @@ https://recruit.toyota/img/interview/main/134@2x.jpg
   - JOJO
   - BLUE GIANT
 
+# 目次・話すこと話さないこと
 
-# 競プロの紹介
+# 競技プログラミングとは
 ## 具体的な問題1
 コーディング試験で出るような、比較的単純な問題
 ## 具体的な問題2
@@ -300,3 +312,15 @@ https://recruit.toyota/img/interview/main/134@2x.jpg
   <text class="tech-small" x="645" y="705">可視化</text>
   <text class="tech-minor" x="750" y="755">性能改善</text>
 </svg>
+
+# AI時代における数理最適化エンジニアの価値
+## 生成AIの実力
+https://sakanaai.github.io/ALE-Bench-Leaderboard/
+のBenchmark Results by Release Date のx16で。できればLongのみのレートにして。
+全てのAIモデルを入れる必要はない。Claude Code, Grok, GPTの主要なモデルのみで。
+2000,2400,3200にメンバーを一人ずつ置いて。時系列でモデルの実力をインタラクティブに見せられるようにして、人間を抜く様子を紹介する
+## 人間の価値
+- モデリング・定式化
+- 膨大な現実世界の情報のエンジニアリング
+- 意思決定
+- 意志をもって進めていく

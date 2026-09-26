@@ -1,107 +1,146 @@
 <script setup>
 import { computed, ref } from 'vue'
 import tree from '../assets/interests.json'
+import photos from '../assets/interest-photos.json'
 
+const photoUrls = import.meta.glob('../assets/photos/*.{jpg,webp}', { eager: true, query: '?url', import: 'default' })
 const colors = ['#2f6fed', '#3584a6', '#5271bd', '#3262a8', '#7068c2', '#578be1', '#358bb2']
-const positions = [[278, 72], [278, 206], [278, 344], [662, 60], [662, 158], [662, 264], [662, 363]]
 const trail = ref([])
 const selected = computed(() => trail.value.reduce((node, index) => node.children[index], tree))
-const color = computed(() => colors[trail.value[0] ?? 0])
 const breadcrumbs = computed(() => {
   let node = tree
   return trail.value.map(index => { node = node.children[index]; return node.label })
 })
-const overview = computed(() => tree.children.map((node, i) => {
-  const [x, y] = positions[i]
-  const side = i < 3 ? -1 : 1
-  return { ...node, i, x, y, side, color: colors[i], leaves: node.children.map((child, j) => ({ ...child, x: x + side * 172, y: y + (j - (node.children.length - 1) / 2) * 19 })) }
-}))
-const groups = computed(() => {
-  const count = selected.value.children.reduce((sum, child) => sum + Math.max(child.children.length, 1), 0)
-  const gap = Math.min(43, 338 / Math.max(count, 1))
-  let cursor = 205 - count * gap / 2
-  return selected.value.children.map((child, i) => {
-    const leaves = child.children.length ? child.children : []
-    const height = Math.max(leaves.length, 1) * gap
-    const group = { ...child, i, x: 405, y: cursor + height / 2, leaves: leaves.map((leaf, j) => ({ ...leaf, j, x: 623, y: cursor + gap * (j + .5) })) }
-    cursor += height
-    return group
-  })
+const photo = computed(() => {
+  if (!trail.value.length) return null
+  const labels = breadcrumbs.value
+  const index = labels.includes('ドライブウェイ') ? 1 : labels.includes('数理最適化') ? 2 : trail.value[0]
+  const item = photos[index]
+  return { ...item, url: photoUrls[`../assets/photos/${item.file}`] }
 })
-function open(index) { trail.value = [index] }
-function drill(index) { if (selected.value.children[index]?.children.length) trail.value = [...trail.value, index] }
-function openLeaf(groupIndex, leafIndex) {
-  if (selected.value.children[groupIndex].children[leafIndex]?.children.length) trail.value = [...trail.value, groupIndex, leafIndex]
+const hasNestedGroups = computed(() => selected.value.children.some(child => child.children.length))
+
+function preview(node) {
+  return node.children.map(child => child.label).join(' · ')
 }
-function branch(x1, y1, x2, y2) {
-  const mid = (x1 + x2) / 2
-  return `M${x1},${y1} C${mid},${y1} ${mid},${y2} ${x2},${y2}`
+function drill(index) {
+  if (selected.value.children[index]?.children.length) trail.value = [...trail.value, index]
+}
+function drillLeaf(groupIndex, leafIndex) {
+  if (selected.value.children[groupIndex].children[leafIndex]?.children.length)
+    trail.value = [...trail.value, groupIndex, leafIndex]
 }
 </script>
 
 <template>
-  <div class="mindmap" @keydown.esc.stop="trail = []">
-    <div class="map-toolbar">
-      <button type="button" :disabled="!trail.length" @click="trail = []">全体を見る</button>
-      <template v-if="trail.length">
-        <span v-for="(label, index) in breadcrumbs" :key="index"><i>/</i><button type="button" @click="trail = trail.slice(0, index + 1)">{{ label }}</button></span>
-      </template>
-      <small v-else>7つの枝から、気になるテーマへ</small>
-    </div>
-    <svg class="mindmap-canvas" viewBox="0 0 940 415" role="group" aria-label="興味をたどるマインドマップ">
-      <template v-if="!trail.length">
-        <g v-for="node in overview" :key="node.label" :style="{ '--branch': node.color }">
-          <path :d="branch(470, 207, node.x, node.y)" :stroke="node.color" class="main-branch" />
-          <path v-for="leaf in node.leaves" :key="leaf.label" :d="branch(node.x, node.y, leaf.x - node.side * 80, leaf.y)" :stroke="node.color" class="twig" />
-          <g class="map-node" role="button" tabindex="0" :aria-label="`${node.label}を拡大`" @click.stop="open(node.i)" @keydown.enter.stop.prevent="open(node.i)" @keydown.space.stop.prevent="open(node.i)">
-            <rect :x="node.x - 51" :y="node.y - 19" width="102" height="38" rx="19" fill="#ffffff" :stroke="node.color" stroke-width="2" />
-            <text :x="node.x" :y="node.y + 5" text-anchor="middle" class="category">{{ node.label }}</text>
-          </g>
-          <g v-for="(leaf, i) in node.leaves" :key="leaf.label" class="map-node" role="button" tabindex="0" :aria-label="`${leaf.label}を表示`" @click.stop="trail = leaf.children.length ? [node.i, i] : [node.i]" @keydown.enter.stop.prevent="trail = leaf.children.length ? [node.i, i] : [node.i]" @keydown.space.stop.prevent="trail = leaf.children.length ? [node.i, i] : [node.i]">
-            <rect :x="leaf.x - 94" :y="leaf.y - 9" width="188" height="18" rx="6" fill="transparent" />
-            <circle :cx="leaf.x - node.side * 80" :cy="leaf.y" r="2.2" :fill="node.color" />
-            <text :x="leaf.x - node.side * 70" :y="leaf.y + 4" :text-anchor="node.side < 0 ? 'end' : 'start'" class="leaf-label">{{ leaf.label }}</text>
-          </g>
-        </g>
-        <circle cx="470" cy="207" r="63" fill="#dce9fc" />
-        <circle cx="470" cy="207" r="54" fill="#142c53" />
-        <text x="470" y="205" text-anchor="middle" fill="#ffffff" style="font-size:22px" font-weight="700">わたし</text>
-        <text x="470" y="229" text-anchor="middle" fill="#8ccaff" style="font-size:9px" letter-spacing="2">INTERESTS</text>
-      </template>
+  <div :class="['interest-map', { overview: !trail.length }]" @keydown.esc.stop="trail = []">
+    <figure v-if="photo" class="image-panel" :class="{ cover: photo.cover }">
+      <div class="image-stage" :style="{ '--image-url': `url('${photo.url}')` }">
+        <img :src="photo.url" :alt="photo.alt" decoding="async" />
+      </div>
+      <figcaption v-if="photo">
+        <span class="photo-caption">{{ photo.caption }}</span>
+        <span class="photo-credit"><a :href="photo.source" target="_blank" rel="noopener noreferrer">{{ photo.author }} · 出典 ↗</a><a v-if="photo.licenseUrl" :href="photo.licenseUrl" target="_blank" rel="noopener noreferrer">{{ photo.license }}</a></span>
+      </figcaption>
+    </figure>
+
+    <div class="tree-panel">
+      <div v-if="!trail.length" class="overview-tree">
+        <svg class="map-connections" viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M415 500 C370 500 382 200 340 200" />
+          <path d="M415 500 C370 500 382 510 340 510" />
+          <path d="M415 500 C370 500 382 820 340 820" />
+          <path d="M585 500 C630 500 618 110 660 110" />
+          <path d="M585 500 C630 500 618 350 660 350" />
+          <path d="M585 500 C630 500 618 590 660 590" />
+          <path d="M585 500 C630 500 618 830 660 830" />
+        </svg>
+        <div class="map-root"><span class="root-node">INTEREST MAP</span></div>
+        <div class="category-list" aria-label="興味の分野">
+          <button v-for="(node, index) in tree.children" :key="node.label" type="button" class="category-row" :style="{ '--accent': colors[index] }" :aria-label="`${node.label}を拡大`" @click="trail = [index]">
+            <span class="category-copy"><strong>{{ node.label }}</strong><small>{{ preview(node) }}</small></span>
+            <span class="row-arrow" aria-hidden="true">›</span>
+          </button>
+        </div>
+      </div>
+
       <template v-else>
-        <path v-for="group in groups" :key="`stem-${group.i}`" :d="branch(175, 207, 405, group.y)" :stroke="color" class="main-branch" />
-        <g v-for="group in groups" :key="group.i">
-          <path v-for="leaf in group.leaves" :key="leaf.label" :d="branch(490, group.y, 618, leaf.y)" :stroke="color" class="twig" />
-          <g :class="{ 'map-node': group.children.length }" :role="group.children.length ? 'button' : undefined" :tabindex="group.children.length ? 0 : undefined" :aria-label="`${group.label}${group.children.length ? 'を拡大' : ''}`" @click.stop="drill(group.i)" @keydown.enter.stop.prevent="drill(group.i)" @keydown.space.stop.prevent="drill(group.i)">
-            <rect x="298" :y="group.y - 16" width="212" height="32" rx="16" fill="#ffffff" :stroke="color" />
-            <text x="404" :y="group.y + 5" text-anchor="middle" style="font-size:13px" font-weight="600" fill="#203856">{{ group.label }}{{ group.children.length ? ' ＋' : '' }}</text>
-          </g>
-          <g v-for="leaf in group.leaves" :key="leaf.label" :class="{ 'map-node': leaf.children.length }" :role="leaf.children.length ? 'button' : undefined" :tabindex="leaf.children.length ? 0 : undefined" @click.stop="openLeaf(group.i, leaf.j)" @keydown.enter.stop.prevent="openLeaf(group.i, leaf.j)" @keydown.space.stop.prevent="openLeaf(group.i, leaf.j)">
-            <rect x="618" :y="leaf.y - 10" width="310" height="21" rx="5" fill="#f3f7fd" />
-            <circle cx="623" :cy="leaf.y" r="3" :fill="color" />
-            <text x="635" :y="leaf.y + 5" style="font-size:13px" fill="#4e6687">{{ leaf.label }}{{ leaf.children.length ? ' ＋' : '' }}</text>
-          </g>
-        </g>
-        <rect x="26" y="76" width="190" height="202" rx="22" fill="#ffffff" :stroke="color" stroke-width="2" />
-        <InterestIllustration :kind="trail[0]" x="44" y="90" width="154" height="115" />
-        <text x="121" y="240" text-anchor="middle" style="font-size:18px" font-weight="700" :fill="color">{{ selected.label }}</text>
-        <text x="121" y="310" text-anchor="middle" fill="#6d83a2" style="font-size:11px">＋ の枝をクリックすると拡大</text>
+        <nav class="tree-toolbar" aria-label="マップの階層">
+          <button type="button" @click="trail = []">← 全体</button>
+          <template v-for="(label, index) in breadcrumbs" :key="index">
+            <span class="separator">/</span>
+            <button type="button" :aria-current="index === breadcrumbs.length - 1 ? 'location' : undefined" @click="trail = trail.slice(0, index + 1)">{{ label }}</button>
+          </template>
+        </nav>
+
+        <div v-if="hasNestedGroups" class="group-grid" :style="{ '--accent': colors[trail[0]] }">
+          <section v-for="(group, groupIndex) in selected.children" :key="group.label" class="group-card">
+            <button v-if="group.children.length" type="button" class="group-name" :aria-label="`${group.label}を拡大`" @click="drill(groupIndex)">{{ group.label }}<span aria-hidden="true">›</span></button>
+            <h2 v-else class="group-name static">{{ group.label }}</h2>
+            <ul v-if="group.children.length">
+              <li v-for="(leaf, leafIndex) in group.children" :key="leaf.label">
+                <button v-if="leaf.children.length" type="button" :aria-label="`${leaf.label}を拡大`" @click="drillLeaf(groupIndex, leafIndex)">{{ leaf.label }}<span aria-hidden="true">›</span></button>
+                <span v-else>{{ leaf.label }}</span>
+              </li>
+            </ul>
+          </section>
+        </div>
+        <div v-else class="leaf-grid" :style="{ '--accent': colors[trail[0]] }">
+          <div v-for="leaf in selected.children" :key="leaf.label" class="leaf-card">{{ leaf.label }}</div>
+        </div>
       </template>
-    </svg>
+    </div>
   </div>
 </template>
 
 <style scoped>
-.mindmap { width: 100%; }
-.map-toolbar { height: 28px; display: flex; align-items: center; gap: 10px; color: #6d83a2; font-size: 11px; }
-.map-toolbar button { border: 0; padding: 3px 9px; border-radius: 10px; color: #2f6fed; background: #dce9fc; cursor: pointer; }
-.map-toolbar button:disabled { color: #6d83a2; background: transparent; cursor: default; }
-.map-toolbar i { margin-right: 8px; font-style: normal; color: #a4b5cc; }
-.mindmap-canvas { display: block; width: 100%; height: 340px; font-family: 'Noto Sans JP', sans-serif; }
-.main-branch { fill: none; stroke-width: 3; opacity: .65; }
-.twig { fill: none; stroke-width: 1.3; opacity: .6; }
-.category { font-size: 16px; fill: var(--branch); font-weight: 700; }
-.leaf-label { font-size: 11px; fill: #526786; }
-.map-node { cursor: pointer; outline: none; }
-.map-node:hover > rect, .map-node:focus-visible > rect { fill: #dce9fc; stroke-width: 3; }
+.interest-map { display: grid; grid-template-columns: minmax(0, 1.06fr) minmax(0, .94fr); gap: 21px; width: 100%; height: 100%; }
+.interest-map.overview { grid-template-columns: minmax(0, 1fr); }
+.image-panel { position: relative; grid-column: 2; grid-row: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; margin: 0; }
+.image-stage { position: relative; display: flex; flex: 1; min-height: 0; align-items: center; justify-content: center; overflow: hidden; border-radius: 15px; background: #e3edfa; }
+.image-stage::before { content: ''; position: absolute; inset: -20px; background-image: var(--image-url); background-position: center; background-size: cover; filter: blur(18px); opacity: .22; }
+.image-stage img { position: relative; z-index: 1; display: block; width: 100%; height: 100%; object-fit: contain; }
+.cover .image-stage::before { display: none; }
+.image-panel figcaption { position: absolute; z-index: 2; right: 0; bottom: 0; left: 0; padding: 30px 13px 11px; border-radius: 0 0 15px 15px; background: linear-gradient(transparent, #10274bd9); }
+.photo-caption { display: block; color: #fff; font-size: 13px; font-weight: 600; line-height: 1.35; }
+.photo-credit { display: flex; gap: 9px; color: #dceafd; font-size: 9px; line-height: 1.5; }
+.photo-credit a { color: inherit; text-decoration: none; }
+.photo-credit a:hover { color: #2f6fed; text-decoration: underline; }
+.tree-panel { grid-column: 1; grid-row: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+.overview-tree { position: relative; height: 100%; min-height: 0; }
+.map-connections { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.map-connections path { fill: none; stroke: #8eafe0; stroke-width: 3; vector-effect: non-scaling-stroke; }
+.map-root { position: absolute; z-index: 1; top: 44%; left: 41.5%; display: flex; align-items: center; justify-content: center; width: 17%; height: 12%; }
+.root-node { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; border-radius: 18px; background: #153b6e; color: white; box-shadow: 0 8px 23px #153b6e2b; font: 700 13px/1 Arial, sans-serif; letter-spacing: .08em; }
+.category-list { position: absolute; inset: 0; }
+.category-row { position: absolute; display: flex; align-items: center; gap: 10px; width: 34%; height: 18%; min-width: 0; padding: 12px 14px; border: 1px solid #ceddf0; border-left: 5px solid var(--accent); border-radius: 12px; background: #fff; color: #213e64; box-shadow: 0 7px 18px #1b49701a; text-align: left; cursor: pointer; }
+.category-row:nth-child(1) { top: 11%; left: 0; }
+.category-row:nth-child(2) { top: 42%; left: 0; }
+.category-row:nth-child(3) { top: 73%; left: 0; }
+.category-row:nth-child(4) { top: 2%; right: 0; }
+.category-row:nth-child(5) { top: 26%; right: 0; }
+.category-row:nth-child(6) { top: 50%; right: 0; }
+.category-row:nth-child(7) { top: 74%; right: 0; }
+.category-row:hover, .category-row:focus-visible { background: #eaf2ff; border-color: var(--accent); outline: none; }
+.category-copy { min-width: 0; display: flex; flex: 1; flex-direction: column; gap: 2px; }
+.category-copy strong { font-size: 18px; line-height: 1.2; }
+.category-copy small { display: -webkit-box; overflow: hidden; color: #6f84a0; font-size: 10px; line-height: 1.45; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.row-arrow { color: var(--accent); font: 700 26px/1 Arial, sans-serif; }
+.tree-toolbar { flex: none; display: flex; align-items: center; flex-wrap: wrap; gap: 2px; min-height: 35px; margin-bottom: 10px; }
+.tree-toolbar button { padding: 5px 7px; border: 0; border-radius: 7px; background: transparent; color: #2f6fed; font-size: 11px; cursor: pointer; }
+.tree-toolbar button:hover, .tree-toolbar button:focus-visible { background: #dceaff; }
+.tree-toolbar button[aria-current] { color: #203856; font-weight: 700; }
+.separator { color: #a6b8ce; font-size: 11px; }
+.group-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-content: start; gap: 9px; min-height: 0; overflow-y: auto; padding-right: 2px; }
+.group-card { min-width: 0; padding: 11px 12px; border: 1px solid #d0dfef; border-left: 4px solid var(--accent); border-radius: 10px; background: #fff; }
+.group-name { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0; border: 0; background: none; color: #24466e; font-size: 14px; font-weight: 700; line-height: 1.35; text-align: left; cursor: pointer; }
+.group-name span, .group-card li button span { color: var(--accent); font: 700 17px/1 Arial, sans-serif; }
+.group-name.static { margin: 0; cursor: default; }
+.group-card ul { margin: 7px 0 0; padding: 0; list-style: none; }
+.group-card li { position: relative; margin: 0; padding: 2px 0 2px 10px; color: #526b8a; font-size: 11px; line-height: 1.45; }
+.group-card li::before { content: ''; position: absolute; top: .78em; left: 0; width: 5px; height: 5px; border-radius: 50%; background: #a5bfdf; }
+.group-card li button { display: flex; align-items: center; justify-content: space-between; gap: 4px; width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.group-card button:hover, .group-card button:focus-visible { color: var(--accent); text-decoration: underline; }
+.leaf-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-content: start; gap: 10px; overflow-y: auto; }
+.leaf-card { min-height: 55px; display: flex; align-items: center; padding: 9px 13px; border: 1px solid #d0dfef; border-left: 4px solid var(--accent); border-radius: 10px; background: #fff; color: #24466e; font-size: 15px; font-weight: 600; line-height: 1.35; }
 </style>
