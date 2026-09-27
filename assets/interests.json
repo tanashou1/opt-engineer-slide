@@ -1,5 +1,5 @@
 {
-  "label": "わたし",
+  "label": "Interest Map",
   "children": [
     {
       "label": "車",
@@ -50,45 +50,7 @@
       ]
     },
     {
-      "label": "土地",
-      "children": [
-        {
-          "label": "長野",
-          "children": []
-        },
-        {
-          "label": "千葉",
-          "children": []
-        },
-        {
-          "label": "筑波",
-          "children": []
-        },
-        {
-          "label": "川崎",
-          "children": []
-        }
-      ]
-    },
-    {
-      "label": "職歴",
-      "children": [
-        {
-          "label": "東芝",
-          "children": []
-        },
-        {
-          "label": "みずほ情報総研",
-          "children": []
-        },
-        {
-          "label": "クロネコヤマト",
-          "children": []
-        }
-      ]
-    },
-    {
-      "label": "経験",
+      "label": "技術",
       "children": [
         {
           "label": "数値計算",

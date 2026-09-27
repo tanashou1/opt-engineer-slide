@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 116" role="img" aria-labelledby="title desc">
+  <title id="title">数値流体の流線</title>
+  <desc id="desc">障害物を回り込む流れを青い曲線で示す模式図</desc>
+  <defs>
+    <linearGradient id="bg" x2="1" y2="1">
+      <stop stop-color="#dcecff"/>
+      <stop offset="1" stop-color="#b8d5fa"/>
+    </linearGradient>
+    <linearGradient id="flow" x2="1">
+      <stop stop-color="#2f6fed"/>
+      <stop offset="1" stop-color="#43a4c8"/>
+    </linearGradient>
+  </defs>
+  <rect width="160" height="116" rx="19" fill="url(#bg)"/>
+  <g fill="none" stroke="url(#flow)" stroke-linecap="round">
+    <path d="M8 17 C47 17 61 19 81 25 S128 30 152 17" stroke-width="3"/>
+    <path d="M8 32 C46 32 58 31 74 39 S116 47 152 33" stroke-width="2.4"/>
+    <path d="M8 49 C45 49 55 49 69 55 S118 66 152 51" stroke-width="2"/>
+    <path d="M8 67 C45 67 55 67 69 62 S118 49 152 67" stroke-width="2"/>
+    <path d="M8 84 C46 84 58 85 74 77 S116 69 152 84" stroke-width="2.4"/>
+    <path d="M8 99 C47 99 61 97 81 91 S128 86 152 99" stroke-width="3"/>
+  </g>
+  <circle cx="91" cy="58" r="15" fill="#194a81" stroke="#fff" stroke-width="3"/>
+  <g fill="#fff" opacity=".82">
+    <circle cx="20" cy="43" r="2"/><circle cx="35" cy="74" r="2"/>
+    <circle cx="119" cy="25" r="2"/><circle cx="136" cy="77" r="2"/>
+  </g>
+</svg>

@@ -27,13 +27,13 @@
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
   },
   {
-    "file": "engineering.jpg",
-    "alt": "北海道に並ぶ風力発電の風車",
-    "caption": "北海道の風力発電",
-    "author": "夢の散歩",
-    "source": "https://commons.wikimedia.org/wiki/File:Electricity_generating_windmills_in_Hokkaido.jpg",
-    "license": "CC BY-SA 3.0",
-    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/"
+    "file": "toshiba-wind.jpg",
+    "alt": "新長島黒ノ瀬戸風力発電所の2基の風車",
+    "caption": "新長島黒ノ瀬戸風力発電所",
+    "author": "東芝",
+    "source": "https://www.global.toshiba/jp/news/energy/2015/11/news-20151113-01.html",
+    "license": "",
+    "licenseUrl": null
   },
   {
     "file": "music.jpg",

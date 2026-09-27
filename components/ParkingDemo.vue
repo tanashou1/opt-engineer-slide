@@ -15,6 +15,20 @@ const boardRows = computed(() => Array.from({ length: rows }, (_, row) =>
 const obstacleCount = computed(() => blocked.value.filter(Boolean).length)
 const openCount = computed(() => total - obstacleCount.value)
 const unmatchedCount = computed(() => solved.value ? openCount.value - pairCount.value * 2 : null)
+const carsByAnchor = computed(() => {
+  const pairs = new Map()
+  for (const [cellId, pairId] of Object.entries(pairAt.value)) {
+    const cells = pairs.get(pairId) ?? []
+    cells.push(Number(cellId))
+    pairs.set(pairId, cells)
+  }
+  const cars = {}
+  for (const [pairId, cells] of pairs) {
+    const anchor = Math.min(...cells)
+    cars[anchor] = { pairId, vertical: Math.abs(cells[0] - cells[1]) === cols }
+  }
+  return cars
+})
 
 function toggleObstacle(id) {
   const next = blocked.value.slice()
@@ -80,10 +94,6 @@ function clearObstacles() {
   solved.value = false
 }
 
-function pairStyle(id) {
-  const value = pairAt.value[id]
-  return value ? { '--tile-color': `hsl(${200 + (value * 13) % 45} ${45 + value % 4 * 8}% ${64 + value % 3 * 7}%)` } : {}
-}
 </script>
 
 <template>
@@ -95,14 +105,24 @@ function pairStyle(id) {
           :key="cell.id"
           type="button"
           role="gridcell"
-          :aria-label="`行${cell.row + 1} 列${cell.col + 1}${blocked[cell.id] ? ' 障害物' : pairAt[cell.id] ? ` 駐車枠${pairAt[cell.id]}` : ' 空きマス'}`"
+          :aria-label="`行${cell.row + 1} 列${cell.col + 1}${blocked[cell.id] ? ' 障害物' : pairAt[cell.id] ? ` 車${pairAt[cell.id]}` : ' 空きマス'}`"
           :aria-pressed="blocked[cell.id]"
-          :class="['parking-cell', { obstacle: blocked[cell.id], paired: pairAt[cell.id] }]"
-          :style="pairStyle(cell.id)"
+          :class="['parking-cell', { obstacle: blocked[cell.id], paired: pairAt[cell.id], 'car-anchor': carsByAnchor[cell.id] }]"
           @click="toggleObstacle(cell.id)"
         >
           <span v-if="blocked[cell.id]" class="obstacle-mark">×</span>
-          <span v-else-if="pairAt[cell.id]" class="pair-mark">{{ String(pairAt[cell.id]).padStart(2, '0') }}</span>
+          <svg v-else-if="carsByAnchor[cell.id]" :class="['car-icon', { vertical: carsByAnchor[cell.id].vertical }]" :viewBox="carsByAnchor[cell.id].vertical ? '0 0 58 120' : '0 0 120 58'" aria-hidden="true">
+            <g :transform="carsByAnchor[cell.id].vertical ? 'translate(58 0) rotate(90)' : undefined">
+              <rect x="24" y="5" width="19" height="8" rx="3" fill="#193c70" />
+              <rect x="77" y="5" width="19" height="8" rx="3" fill="#193c70" />
+              <rect x="24" y="45" width="19" height="8" rx="3" fill="#193c70" />
+              <rect x="77" y="45" width="19" height="8" rx="3" fill="#193c70" />
+              <rect x="12" y="10" width="96" height="38" rx="15" fill="#2f6fed" stroke="#17488e" stroke-width="2" />
+              <path d="M43 13 Q35 29 43 45 M78 13 Q86 29 78 45" fill="none" stroke="#17488e" stroke-width="2" />
+              <rect x="45" y="15" width="31" height="28" rx="8" fill="#b8d9ff" />
+              <path d="M16 19 L16 39 M104 19 L104 39" stroke="#dbeaff" stroke-width="3" stroke-linecap="round" />
+            </g>
+          </svg>
           <span v-else class="cell-mark"></span>
         </button>
       </div>
@@ -132,11 +152,14 @@ function pairStyle(id) {
 .parking-demo { display: grid; grid-template-columns: minmax(430px, 1.1fr) minmax(250px, .9fr); gap: 36px; align-items: center; }
 .parking-board { display: flex; flex-direction: column; gap: 4px; padding: 13px; background: #dce7f7; box-shadow: 7px 8px 0 #c1d3ec; }
 .parking-row { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
-.parking-cell { display: grid; aspect-ratio: 1.16; place-items: center; padding: 0; border: 1px solid #c5d5ed; border-radius: 2px; color: #244c7e; background: #ffffff; cursor: pointer; transition: background-color .12s ease, transform .12s ease; }
+.parking-cell { position: relative; display: grid; aspect-ratio: 1; place-items: center; padding: 0; border: 1px solid #c5d5ed; border-radius: 2px; color: #244c7e; background: #ffffff; cursor: pointer; transition: background-color .12s ease, transform .12s ease; }
 .parking-cell:hover { z-index: 1; border-color: #e77949; transform: scale(1.06); }
-.parking-cell.paired { border-color: color-mix(in srgb, var(--tile-color), #315980 25%); background: var(--tile-color); }
+.parking-cell.car-anchor { z-index: 2; }
 .parking-cell.obstacle { border-color: #203b63; background: #203b63; }
-.cell-mark { width: 4px; height: 4px; border-radius: 50%; background: #c3d3ea; }.obstacle-mark { color: #a4d2ff; font: 400 22px/1 Arial,sans-serif; }.pair-mark { color: rgba(24,48,45,.7); font: 700 9px Arial,sans-serif; letter-spacing: -.04em; }
+.cell-mark { width: 4px; height: 4px; border-radius: 50%; background: #c3d3ea; }.obstacle-mark { color: #a4d2ff; font: 400 22px/1 Arial,sans-serif; }
+.parking-cell.paired .cell-mark { opacity: 0; }
+.car-icon { position: absolute; top: 0; left: 0; width: calc(200% + 4px); height: 100%; overflow: visible; pointer-events: none; }
+.car-icon.vertical { width: 100%; height: calc(200% + 4px); }
 .parking-controls { display: flex; flex-direction: column; align-items: stretch; gap: 18px; }.parking-status { display: flex; align-items: center; gap: 14px; min-height: 64px; padding-bottom: 13px; border-bottom: 1px solid #d5e1f2; }.parking-status strong { color: #2867c2; font: 700 35px Arial,sans-serif; }.parking-status strong small { padding-left: 4px; font-size: 14px; }.parking-status span { color: #6d83a2; font-size: 12px; line-height: 1.6; }.parking-status b { display: block; color: #5275a3; font-weight: 500; }
 .parking-actions { display: flex; flex-direction: column; gap: 9px; }.parking-actions button { min-height: 43px; padding: 10px 14px; cursor: pointer; font-family: inherit; font-weight: 600; font-size: 13px; }.clear-button { border: 1px solid #c6d5ed; color: #45658b; background: transparent; }.clear-button:hover { background: #ffffff; }.solve-button { display: flex; justify-content: space-between; align-items: center; border: 1px solid #2f6fed; color: #ffffff; background: #2f6fed; box-shadow: 4px 4px 0 #c5d9fa; }.solve-button:hover { background: #2457bd; }.solve-button span { color: #c2e0ff; font-size: 17px; }
 .parking-instruction { margin: 0; color: #6d83a2; font-size: 11px; line-height: 1.7; }

@@ -48,6 +48,11 @@
 .trace-complexity { display:flex; gap: 15px; align-items: center; margin-top: 22px; }
 .trace-complexity b { color: var(--blue); font-size: 23px; white-space: nowrap; }
 .trace-complexity span { font-size: 11px; color: #697f9d; }
+.ants-problem-head { margin-bottom: 12px !important; }
+.ants-problem-head h1 { font-size: 31px !important; }
+.slidev-layout.ants-explanation-slide { padding: 28px 48px; }
+.ants-explanation-head { margin-bottom: 10px !important; }
+.ants-explanation-head h1 { font-size: 30px !important; }
 .water-formula { padding: 14px 15px; border-radius: 11px; background: #dceaff; color: #537298; font-size: 12px; line-height: 1.7; }
 .water-formula strong { color: #214d84; font-size: 14px; white-space: nowrap; }
 .water-trace { margin-top: 25px; border: 1px solid #d4e0f0; border-radius: 10px; overflow: hidden; }
@@ -76,8 +81,8 @@
 .parking-head { display: flex; justify-content: space-between; align-items: end; margin-bottom: 24px; }
 .parking-head h1 { margin: 0; font-size: 30px; }
 .parking-legend { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 10px; }
-.legend-obstacle,.legend-tile { display: inline-block; width: 11px; height: 11px; margin-left: 8px; background: #203b63; border-radius: 2px; }
-.legend-tile { background: #7eadeb; }
+.legend-obstacle { display: inline-block; width: 11px; height: 11px; margin-left: 8px; background: #203b63; border-radius: 2px; }
+.legend-car { width: 22px; height: 13px; margin-left: 8px; }
 .ahc-slide .section-head.compact { margin-bottom: 8px; }
 .slidev-layout.tech-slide { padding: 8px 16px; background: #0f172a; }
 .closing-slide { position: relative; display: flex; flex-direction: column; justify-content: center; overflow: hidden; padding: 60px 70px; color: white; background: #10274b; }

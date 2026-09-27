@@ -58,52 +58,32 @@ class: section-divider
 class: problem-slide
 ---
 
-<div class="section-head compact">
-  <p class="eyebrow">PROBLEM 01 · コーディング試験のような問題</p>
-  <h1>雨が降ると、水は何マスたまる？</h1>
+<script setup>
+import AntsDiagram from './components/AntsDiagram.vue'
+</script>
+
+<div class="section-head compact ants-problem-head">
+  <p class="eyebrow">PROBLEM 01 · ANTS</p>
+  <h1>アリが全員落ちるのは、何秒後？</h1>
+  <p>長さ10の棒に5匹。速さは1。衝突すると反転し、端から落ちる。向きは図のとおり。</p>
 </div>
 
-<RainwaterDiagram />
+<AntsDiagram />
 
 ---
-layout: two-cols
-class: code-slide
-layoutClass: code-columns
+class: ants-explanation-slide
 ---
 
-<p class="eyebrow">LINEAR TIME · TWO SCANS</p>
+<script setup>
+import AntsIdeaDiagram from './components/AntsIdeaDiagram.vue'
+</script>
 
-# 左右の壁を見れば、数えられる。
-
-```python
-def trapped_water(h):
-    left = []
-    peak = 0
-    for x in h:
-        peak = max(peak, x)
-        left.append(peak)
-    water = right = 0
-    for i in range(len(h)-1, -1, -1):
-        right = max(right, h[i])
-        water += min(left[i], right) - h[i]
-    return water
-```
-
-<div class="code-example">trapped_water([3, 0, 2, 0, 4]) <strong>→ 7</strong></div>
-
-::right::
-
-<div class="trace-panel">
-  <p class="eyebrow">各マスで水位を求める</p>
-  <div class="water-formula">水の高さ =<br><strong>min(左の最高, 右の最高) − 建物の高さ</strong></div>
-  <div class="water-trace" aria-label="建物の高さと各マスの水の量">
-    <div><span>建物</span><b>3</b><b>0</b><b>2</b><b>0</b><b>4</b></div>
-    <div><span>左の最高</span><b>3</b><b>3</b><b>3</b><b>3</b><b>4</b></div>
-    <div><span>右の最高</span><b>4</b><b>4</b><b>4</b><b>4</b><b>4</b></div>
-    <div class="water-result"><span>水</span><b>0</b><b>3</b><b>1</b><b>3</b><b>0</b></div>
-  </div>
-  <div class="trace-complexity"><b>O(n)</b><span>左から1回、右から1回。<br>追加メモリ O(n)</span></div>
+<div class="section-head compact ants-explanation-head">
+  <p class="eyebrow">ANTS · THE KEY IDEA</p>
+  <h1>衝突は「素通り」と考えてOK。</h1>
 </div>
+
+<AntsIdeaDiagram />
 
 ---
 class: demo-intro
@@ -136,7 +116,7 @@ class: parking-slide
 
 <div class="parking-head">
   <div><p class="eyebrow">TRY IT</p><h1>障害物を置いて、解いてみる。</h1></div>
-  <div class="parking-legend"><span class="legend-obstacle"></span>障害物 <span class="legend-tile"></span>駐車枠</div>
+  <div class="parking-legend"><span class="legend-obstacle"></span>障害物 <svg class="legend-car" viewBox="0 0 24 14" aria-hidden="true"><rect x="2" y="3" width="20" height="8" rx="4" fill="#2f6fed" /><rect x="9" y="4" width="6" height="6" rx="2" fill="#b8d9ff" /></svg>駐車した車</div>
 </div>
 <ParkingDemo />
 
@@ -196,8 +176,7 @@ class: ai-progress-slide
 
 <div class="section-head compact">
   <p class="eyebrow">AI CAPABILITY · ALE-BENCH</p>
-  <h1>生成AIは、どこまで来たか。</h1>
-  <p>AHC由来の最適化問題で比較。公開日を動かすと、モデルの実力の変化が見える。</p>
+  <h1>最適化領域における生成AIの実力</h1>
 </div>
 
 <AiProgress />

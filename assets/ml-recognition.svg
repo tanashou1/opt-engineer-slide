@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 90" role="img" aria-labelledby="title">
+  <title id="title">画像認識の模式図</title>
+  <rect width="100" height="90" rx="14" fill="#e2efff"/>
+  <g fill="#93bdf4">
+    <rect x="12" y="13" width="15" height="15" rx="3"/><rect x="31" y="13" width="15" height="15" rx="3"/>
+    <rect x="50" y="13" width="15" height="15" rx="3"/><rect x="69" y="13" width="15" height="15" rx="3"/>
+    <rect x="12" y="32" width="15" height="15" rx="3"/><rect x="69" y="32" width="15" height="15" rx="3"/>
+    <rect x="12" y="51" width="15" height="15" rx="3"/><rect x="69" y="51" width="15" height="15" rx="3"/>
+    <rect x="12" y="70" width="15" height="10" rx="3"/><rect x="31" y="70" width="15" height="10" rx="3"/>
+    <rect x="50" y="70" width="15" height="10" rx="3"/><rect x="69" y="70" width="15" height="10" rx="3"/>
+  </g>
+  <path d="M36 52l11 10 20-28" fill="none" stroke="#2f6fed" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
