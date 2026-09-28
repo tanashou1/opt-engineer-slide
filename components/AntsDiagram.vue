@@ -7,8 +7,9 @@ const initialAnts = () => [
   { id: 'B', x: 3, dir: -1, tone: 'coral', fallen: false, turning: false },
   { id: 'C', x: 5, dir: 1, tone: 'mint', fallen: false, turning: false },
   { id: 'D', x: 7, dir: -1, tone: 'violet', fallen: false, turning: false },
-  { id: 'E', x: 9, dir: 1, tone: 'gold', fallen: false, turning: false },
+  { id: 'E', x: 9, dir: -1, tone: 'gold', fallen: false, turning: false },
 ]
+const initialPositions = initialAnts().map(ant => ant.x)
 
 const ants = ref(initialAnts())
 const impacts = ref([])
@@ -36,16 +37,25 @@ function getAntGeometry() {
 function animate(now) {
   if (!playing.value) return
 
-  const dt = Math.min((now - lastTime) / 1000, 0.05) * PLAYBACK_RATE
+  const previousTime = lastTime
+  const frameDuration = Math.min(now - previousTime, 50)
+  const dt = frameDuration / 1000 * PLAYBACK_RATE
   lastTime = now
   const { headContactDistance, turnDuration } = getAntGeometry()
   const before = ants.value
   const moved = before.map(ant => ({
     ...ant,
-    x: ant.fallen || ant.turning ? ant.x : ant.x + ant.dir * dt,
+    x: ant.fallen ? ant.x : ant.x + ant.dir * dt,
     turnProgress: ant.turning ? Math.min(1, (now - ant.turnStartedAt) / turnDuration) : 0,
     turning: ant.turning && now - ant.turnStartedAt < turnDuration,
   }))
+
+  const startTurn = (ant, fromDir, startedAt) => {
+    ant.turnFromDir = fromDir
+    ant.turnStartedAt = startedAt
+    ant.turnProgress = Math.min(1, Math.max(0, (now - startedAt) / turnDuration))
+    ant.turning = true
+  }
 
   for (let i = 0; i < moved.length - 1; i++) {
     const leftBefore = before[i]
@@ -53,25 +63,30 @@ function animate(now) {
     const left = moved[i]
     const right = moved[i + 1]
     const wereApproaching = !leftBefore.fallen && !rightBefore.fallen
-      && !leftBefore.turning && !rightBefore.turning
       && leftBefore.dir === 1 && rightBefore.dir === -1
     const gapBefore = rightBefore.x - leftBefore.x
     const gapAfter = right.x - left.x
+
     if (wereApproaching && gapBefore > headContactDistance && gapAfter <= headContactDistance) {
-      const point = (left.x + right.x) / 2
-      left.x = point - headContactDistance / 2
-      right.x = point + headContactDistance / 2
-      left.turnFromDir = leftBefore.dir
-      right.turnFromDir = rightBefore.dir
+      const fraction = (gapBefore - headContactDistance) / (gapBefore - gapAfter)
+      const point = (leftBefore.x + (left.x - leftBefore.x) * fraction
+        + rightBefore.x + (right.x - rightBefore.x) * fraction) / 2
+      const contactTime = previousTime + frameDuration * fraction
+      if (!left.turning) startTurn(left, leftBefore.dir, contactTime)
+      if (!right.turning) startTurn(right, rightBefore.dir, contactTime)
+      impacts.value.push({ id: impactId++, x: point, at: contactTime })
+    }
+
+    if (wereApproaching && gapBefore > 0 && gapAfter <= 0) {
+      const fraction = gapBefore / (gapBefore - gapAfter)
+      const point = leftBefore.x + (left.x - leftBefore.x) * fraction
+      const remaining = dt * (1 - fraction)
+      left.x = point - remaining
+      right.x = point + remaining
+      if (!left.turning) startTurn(left, leftBefore.dir, previousTime + frameDuration * fraction)
+      if (!right.turning) startTurn(right, rightBefore.dir, previousTime + frameDuration * fraction)
       left.dir = -1
       right.dir = 1
-      left.turning = true
-      right.turning = true
-      left.turnStartedAt = now
-      right.turnStartedAt = now
-      left.turnProgress = 0
-      right.turnProgress = 0
-      impacts.value.push({ id: impactId++, x: point, at: now })
     }
   }
 
@@ -133,6 +148,11 @@ onBeforeUnmount(() => cancelAnimationFrame(frame))
       <div class="ruler" aria-hidden="true">
         <span class="end-tick left-tick"></span><span class="end-tick right-tick"></span>
         <span class="end-number left-number">0</span><span class="end-number right-number">10</span>
+        <template v-for="position in initialPositions" :key="position">
+          <span class="position-tick" :style="{ left: `${position * 10}%` }"></span>
+          <span class="position-number" :style="{ left: `${position * 10}%` }">{{ position }}</span>
+        </template>
+        <span class="ruler-caption">初期位置</span>
       </div>
 
       <div
@@ -194,6 +214,9 @@ onBeforeUnmount(() => cancelAnimationFrame(frame))
 .end-number { position: absolute; top: 11px; transform: translateX(-50%); color: #7389a4; font: 600 11px Arial,sans-serif; }
 .left-number { left: 0; }
 .right-number { left: 100%; }
+.position-tick { position: absolute; top: 0; height: 5px; border-left: 1px solid #91a9c5; }
+.position-number { position: absolute; top: 11px; transform: translateX(-50%); color: #506f94; font: 700 10px Arial,sans-serif; }
+.ruler-caption { position: absolute; top: 25px; left: 50%; transform: translateX(-50%); color: #91a3b8; font-size: 8px; white-space: nowrap; }
 .runner { position: absolute; top: 112px; z-index: 2; width: 60px; height: 68px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; transition: top .25s ease, opacity .22s ease; }
 .runner.fallen { top: 168px; opacity: 0; }
 .runner-id { display: grid; place-items: center; width: 14px; height: 14px; border-radius: 50%; color: white; font: 700 8px Arial,sans-serif; }
