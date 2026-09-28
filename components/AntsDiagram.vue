@@ -3,32 +3,48 @@ import { onBeforeUnmount, ref } from 'vue'
 import CuteAnt from './CuteAnt.vue'
 
 const initialAnts = () => [
-  { id: 'A', x: 1, dir: 1, tone: 'blue', fallen: false },
-  { id: 'B', x: 3, dir: -1, tone: 'coral', fallen: false },
-  { id: 'C', x: 5, dir: 1, tone: 'mint', fallen: false },
-  { id: 'D', x: 7, dir: -1, tone: 'violet', fallen: false },
-  { id: 'E', x: 9, dir: 1, tone: 'gold', fallen: false },
+  { id: 'A', x: 1, dir: 1, tone: 'blue', fallen: false, turning: false },
+  { id: 'B', x: 3, dir: -1, tone: 'coral', fallen: false, turning: false },
+  { id: 'C', x: 5, dir: 1, tone: 'mint', fallen: false, turning: false },
+  { id: 'D', x: 7, dir: -1, tone: 'violet', fallen: false, turning: false },
+  { id: 'E', x: 9, dir: 1, tone: 'gold', fallen: false, turning: false },
 ]
 
 const ants = ref(initialAnts())
 const impacts = ref([])
 const playing = ref(false)
 const finished = ref(false)
-const CONTACT = 0.015
+const stageElement = ref(null)
+const PLAYBACK_RATE = 0.9
+const ANT_WIDTH_PX = 52
+const ROD_WIDTH_RATIO = 0.88
+const HEAD_REACH_RATIO = 36.5 / 92
 const contact = (x) => `${6 + x / 10 * 88}%`
 let frame = 0
 let lastTime = 0
 let impactId = 0
 
+function getAntGeometry() {
+  const stageWidth = stageElement.value?.clientWidth ?? 800
+  const pixelsPerUnit = stageWidth * ROD_WIDTH_RATIO / 10
+  return {
+    headContactDistance: 2 * ANT_WIDTH_PX * HEAD_REACH_RATIO / pixelsPerUnit,
+    turnDuration: ANT_WIDTH_PX / pixelsPerUnit / PLAYBACK_RATE * 1000,
+  }
+}
+
 function animate(now) {
   if (!playing.value) return
 
-  const dt = Math.min((now - lastTime) / 1000, 0.05) * 1.25
+  const dt = Math.min((now - lastTime) / 1000, 0.05) * PLAYBACK_RATE
   lastTime = now
+  const { headContactDistance, turnDuration } = getAntGeometry()
   const before = ants.value
   const moved = before.map(ant => ({
     ...ant,
-    x: ant.fallen ? ant.x : ant.x + ant.dir * dt,
+    x: ant.fallen || ant.turning ? ant.x : ant.x + ant.dir * dt,
+    turnProgress: ant.turning ? Math.min(1, (now - ant.turnStartedAt) / turnDuration) : 0,
+    turning: ant.turning && now - ant.turnStartedAt < turnDuration,
   }))
 
   for (let i = 0; i < moved.length - 1; i++) {
@@ -37,13 +53,24 @@ function animate(now) {
     const left = moved[i]
     const right = moved[i + 1]
     const wereApproaching = !leftBefore.fallen && !rightBefore.fallen
+      && !leftBefore.turning && !rightBefore.turning
       && leftBefore.dir === 1 && rightBefore.dir === -1
-    if (wereApproaching && leftBefore.x < rightBefore.x && left.x >= right.x) {
+    const gapBefore = rightBefore.x - leftBefore.x
+    const gapAfter = right.x - left.x
+    if (wereApproaching && gapBefore > headContactDistance && gapAfter <= headContactDistance) {
       const point = (left.x + right.x) / 2
-      left.x = point - CONTACT / 2
-      right.x = point + CONTACT / 2
+      left.x = point - headContactDistance / 2
+      right.x = point + headContactDistance / 2
+      left.turnFromDir = leftBefore.dir
+      right.turnFromDir = rightBefore.dir
       left.dir = -1
       right.dir = 1
+      left.turning = true
+      right.turning = true
+      left.turnStartedAt = now
+      right.turnStartedAt = now
+      left.turnProgress = 0
+      right.turnProgress = 0
       impacts.value.push({ id: impactId++, x: point, at: now })
     }
   }
@@ -94,7 +121,7 @@ onBeforeUnmount(() => cancelAnimationFrame(frame))
 
 <template>
   <section class="ants-question" aria-label="棒の上の5匹のアリが動く図">
-    <div class="ants-stage">
+    <div ref="stageElement" class="ants-stage">
       <div class="length-marker" aria-hidden="true">
         <span class="measure left-end"></span><span class="measure-line"></span><span class="measure right-end"></span>
         <b>棒の長さ 10</b>
@@ -112,12 +139,18 @@ onBeforeUnmount(() => cancelAnimationFrame(frame))
         v-for="ant in ants"
         :key="ant.id"
         class="runner"
-        :class="[ant.tone, { fallen: ant.fallen }]"
+        :class="[ant.tone, { fallen: ant.fallen, turning: ant.turning }]"
         :style="{ left: contact(ant.x) }"
       >
         <span class="runner-id">{{ ant.id }}</span>
-        <span class="direction-arrow" aria-hidden="true">{{ ant.dir === 1 ? '→' : '←' }}</span>
-        <CuteAnt :size="52" :facing="ant.dir === 1 ? 'right' : 'left'" :tone="ant.tone" />
+        <span
+          class="direction-arrow"
+          :style="{ transform: ant.turning ? `scaleX(${1 - 2 * ant.turnProgress})` : undefined }"
+          aria-hidden="true"
+        >{{ (ant.turning ? ant.turnFromDir : ant.dir) === 1 ? '→' : '←' }}</span>
+        <div class="ant-turn" :style="{ transform: ant.turning ? `scaleX(${1 - 2 * ant.turnProgress})` : undefined }">
+          <CuteAnt :size="52" :facing="(ant.turning ? ant.turnFromDir : ant.dir) === 1 ? 'right' : 'left'" :tone="ant.tone" />
+        </div>
       </div>
 
       <span
@@ -164,7 +197,7 @@ onBeforeUnmount(() => cancelAnimationFrame(frame))
 .runner { position: absolute; top: 112px; z-index: 2; width: 60px; height: 68px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; transition: top .25s ease, opacity .22s ease; }
 .runner.fallen { top: 168px; opacity: 0; }
 .runner-id { display: grid; place-items: center; width: 14px; height: 14px; border-radius: 50%; color: white; font: 700 8px Arial,sans-serif; }
-.direction-arrow { height: 17px; color: #4c86cd; font: 700 13px/17px Arial,sans-serif; }
+.direction-arrow { height: 18px; color: #4c86cd; font: 700 16px/18px Arial,sans-serif; }
 .blue .runner-id, .ant-legend .blue { background: #347ac4; }
 .coral .runner-id, .ant-legend .coral { background: #d96d62; }
 .mint .runner-id, .ant-legend .mint { background: #288a70; }
@@ -175,7 +208,10 @@ onBeforeUnmount(() => cancelAnimationFrame(frame))
 .mint .direction-arrow { color: #288a70; }
 .violet .direction-arrow { color: #795fba; }
 .gold .direction-arrow { color: #aa7410; }
-.impact { position: absolute; top: 141px; z-index: 3; transform: translateX(-50%); color: #f3a449; font-size: 25px; line-height: 1; animation: pop .42s ease-out forwards; pointer-events: none; }
+.runner.turning { z-index: 4; }
+.runner.turning .runner-id { box-shadow: 0 0 0 3px #fff, 0 0 0 5px #ffc15e; }
+.ant-turn { display: flex; transform-origin: center center; }
+.impact { position: absolute; top: 141px; z-index: 3; transform: translateX(-50%); color: #f3a449; font-size: 29px; line-height: 1; animation: pop .42s ease-out forwards; pointer-events: none; }
 .control-bar { display: flex; align-items: center; justify-content: space-between; }
 .ant-legend, .transport-controls { display: flex; align-items: center; gap: 6px; }
 .ant-legend { color: #7c90a9; font-size: 10px; }
