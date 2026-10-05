@@ -186,6 +186,10 @@ class: ahc-slide
 title: 厳密最適が出せない問題
 ---
 
+<script setup>
+import ContainerLoading from './components/ContainerLoading.vue'
+</script>
+
 <DeckHeader chapter="2 数理最適化（競技プログラミング）の問題紹介" subtitle="Toyota HC 2023 Spring · Container Loading" title="厳密最適が出せない問題" description="現実の課題の多くは、効率的な解法が見つかっておらず、厳密な最適解を求めるのは困難。" />
 
 <ContainerLoading />
