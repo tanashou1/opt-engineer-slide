@@ -77,14 +77,14 @@ const humans = [
 ]
 
 const labelOverrides: Record<string, { offset: number }> = {
-  'Claude 4.8 Opus high': { offset: 16 },
-  'Claude Fable 5 high': { offset: -14 },
+  'Claude 4.8 Opus high': { offset: 5 },
+  'Claude Fable 5 high': { offset: -4 },
 }
 const displayName = (name: string) => name.replace(/\s+(?:low|medium|high|xhigh|max)$/i, '')
 
 const modelLabels = computed(() => {
   const placed: { left: number; right: number; top: number; bottom: number }[] = []
-  const offsets = [-9, 14, -21, 26, -33, 38, -45, 50, -57, 62]
+  const offsets = [3, -5, 8, -10, 13, -15, 18, -20, 23, -25]
   const points = visible.value.flatMap(group => group.points.map((point, index) => ({
     ...point,
     color: group.color,
@@ -99,7 +99,7 @@ const modelLabels = computed(() => {
   for (const point of points) {
     const override = labelOverrides[point.name]
     if (!override) continue
-    const labelX = point.pointX + 18
+    const labelX = point.pointX + 7
     const labelY = Math.max(top + 8, Math.min(bottom - 2, point.pointY + override.offset))
     placed.push({ left: labelX - 3, right: labelX + point.width + 3, top: labelY - 8, bottom: labelY + 2 })
     fixedPositions.set(point.name, { labelX, labelY, anchor: 'start' })
@@ -110,7 +110,7 @@ const modelLabels = computed(() => {
     if (fixed) return { ...point, ...fixed }
 
     const anchor = 'start'
-    const labelX = point.pointX + 10
+    const labelX = point.pointX + 7
     const leftEdge = labelX
     const rightEdge = labelX + point.width
     let best = { baseline: Math.max(top + 8, Math.min(bottom - 2, point.pointY - 9)), overlap: Infinity }
@@ -176,9 +176,11 @@ onUnmounted(stop)
         <line :x1="x(currentDate)" :x2="x(currentDate)" :y1="top" :y2="bottom" stroke="#667c9c" stroke-width="1" stroke-dasharray="3 5" opacity=".6" />
         <g v-for="group in visible" :key="group.name">
           <path v-if="group.points.length > 1" :d="path(group.points)" fill="none" :stroke="group.color" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity=".75" />
-          <circle v-for="point in group.points" :key="point.name" :cx="x(point.date)" :cy="y(point.score)" r="4.5" :fill="group.color" stroke="white" stroke-width="2" />
         </g>
         <text v-for="point in modelLabels" v-show="showModelLabels" :key="point.name" :x="point.labelX" :y="point.labelY" :text-anchor="point.anchor" :fill="point.latest ? point.color : point.mutedColor" class="ai-model-label">{{ point.displayName }}</text>
+        <g v-for="group in visible" :key="`${group.name}-points`">
+          <circle v-for="point in group.points" :key="point.name" :cx="x(point.date)" :cy="y(point.score)" r="4.5" :fill="group.color" stroke="white" stroke-width="2" />
+        </g>
       </svg>
     </div>
     <div class="ai-controls">

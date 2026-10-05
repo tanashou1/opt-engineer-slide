@@ -50,7 +50,7 @@
 .trace-complexity span { font-size: 11px; color: #697f9d; }
 .ants-problem-head { margin-bottom: 12px !important; }
 .ants-problem-head h1 { font-size: 31px !important; }
-.slidev-layout.ants-explanation-slide { padding: 28px 48px; }
+.slidev-layout.ants-explanation-slide { padding: 28px 54px; }
 .ants-explanation-head { margin-bottom: 10px !important; }
 .ants-explanation-head h1 { font-size: 30px !important; }
 .water-formula { padding: 14px 15px; border-radius: 11px; background: #dceaff; color: #537298; font-size: 12px; line-height: 1.7; }
@@ -98,3 +98,8 @@
 .slidev-layout .closing-thanks { margin-top: 42px; }
 
 .hero-slide .hero-title { font-size: 52px; }
+
+.value-slide .section-head > p:last-child { color: #607795; }
+.closing-slide .eyebrow { color: #8cb8f1; }
+.closing-slide .closing-message { position: relative; z-index: 1; margin: 26px 0 0; color: #c0d5ef; font-size: 16px; }
+.closing-slide .closing-points { position: relative; z-index: 1; }

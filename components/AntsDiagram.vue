@@ -2,6 +2,10 @@
 import { onBeforeUnmount, ref } from 'vue'
 import CuteAnt from './CuteAnt.vue'
 
+const props = defineProps({
+  pointsOnly: { type: Boolean, default: false },
+})
+
 const initialAnts = () => [
   { id: 'A', x: 1, dir: 1, tone: 'blue', fallen: false, turning: false },
   { id: 'B', x: 3, dir: -1, tone: 'coral', fallen: false, turning: false },
@@ -15,6 +19,8 @@ const ants = ref(initialAnts())
 const impacts = ref([])
 const playing = ref(false)
 const finished = ref(false)
+const elapsedTime = ref(0)
+const showElapsed = ref(true)
 const stageElement = ref(null)
 const PLAYBACK_RATE = 0.9
 const ANT_WIDTH_PX = 52
@@ -29,7 +35,7 @@ function getAntGeometry() {
   const stageWidth = stageElement.value?.clientWidth ?? 800
   const pixelsPerUnit = stageWidth * ROD_WIDTH_RATIO / 10
   return {
-    headContactDistance: 2 * ANT_WIDTH_PX * HEAD_REACH_RATIO / pixelsPerUnit,
+    headContactDistance: props.pointsOnly ? 0 : 2 * ANT_WIDTH_PX * HEAD_REACH_RATIO / pixelsPerUnit,
     turnDuration: ANT_WIDTH_PX / pixelsPerUnit / PLAYBACK_RATE * 1000,
   }
 }
@@ -41,6 +47,7 @@ function animate(now) {
   const frameDuration = Math.min(now - previousTime, 50)
   const dt = frameDuration / 1000 * PLAYBACK_RATE
   lastTime = now
+  elapsedTime.value += dt
   const { headContactDistance, turnDuration } = getAntGeometry()
   const before = ants.value
   const moved = before.map(ant => ({
@@ -115,6 +122,7 @@ function play() {
   if (finished.value) {
     ants.value = initialAnts()
     impacts.value = []
+    elapsedTime.value = 0
     finished.value = false
   }
   playing.value = true
@@ -129,6 +137,7 @@ function stop() {
   frame = 0
   ants.value = initialAnts()
   impacts.value = []
+  elapsedTime.value = 0
 }
 
 onBeforeUnmount(() => cancelAnimationFrame(frame))
@@ -136,13 +145,14 @@ onBeforeUnmount(() => cancelAnimationFrame(frame))
 
 <template>
   <section class="ants-question" aria-label="棒の上の5匹のアリが動く図">
-    <div ref="stageElement" class="ants-stage">
+    <div ref="stageElement" class="ants-stage" :class="{ 'points-only': props.pointsOnly }">
       <div class="length-marker" aria-hidden="true">
         <span class="measure left-end"></span><span class="measure-line"></span><span class="measure right-end"></span>
-        <b>棒の長さ 10</b>
+        <b>棒の長さ 10 cm</b>
       </div>
-      <div class="fall-label left-label">落下 ←</div>
-      <div class="fall-label right-label">→ 落下</div>
+      <div v-if="showElapsed" class="elapsed-readout" role="timer">
+        <span>経過時間</span><strong>{{ elapsedTime.toFixed(1) }}<small>秒</small></strong>
+      </div>
 
       <div class="rod" aria-hidden="true"></div>
       <div class="ruler" aria-hidden="true">
@@ -152,14 +162,14 @@ onBeforeUnmount(() => cancelAnimationFrame(frame))
           <span class="position-tick" :style="{ left: `${position * 10}%` }"></span>
           <span class="position-number" :style="{ left: `${position * 10}%` }">{{ position }}</span>
         </template>
-        <span class="ruler-caption">初期位置</span>
+        <span class="ruler-caption">初期位置 (cm)</span>
       </div>
 
       <div
         v-for="ant in ants"
         :key="ant.id"
         class="runner"
-        :class="[ant.tone, { fallen: ant.fallen, turning: ant.turning }]"
+        :class="[ant.tone, { fallen: ant.fallen, turning: ant.turning, 'points-only': props.pointsOnly }]"
         :style="{ left: contact(ant.x) }"
       >
         <span class="runner-id">{{ ant.id }}</span>
@@ -168,7 +178,8 @@ onBeforeUnmount(() => cancelAnimationFrame(frame))
           :style="{ transform: ant.turning ? `scaleX(${1 - 2 * ant.turnProgress})` : undefined }"
           aria-hidden="true"
         >{{ (ant.turning ? ant.turnFromDir : ant.dir) === 1 ? '→' : '←' }}</span>
-        <div class="ant-turn" :style="{ transform: ant.turning ? `scaleX(${1 - 2 * ant.turnProgress})` : undefined }">
+        <div v-if="props.pointsOnly" class="point-mark" aria-hidden="true"></div>
+        <div v-else class="ant-turn" :style="{ transform: ant.turning ? `scaleX(${1 - 2 * ant.turnProgress})` : undefined }">
           <CuteAnt :size="52" :facing="(ant.turning ? ant.turnFromDir : ant.dir) === 1 ? 'right' : 'left'" :tone="ant.tone" />
         </div>
       </div>
@@ -189,13 +200,20 @@ onBeforeUnmount(() => cancelAnimationFrame(frame))
       <div class="transport-controls">
         <button class="play-button" type="button" :disabled="playing" @click="play">▶ 再生</button>
         <button class="stop-button" type="button" :disabled="!playing && !finished" @click="stop">■ 停止</button>
+        <button
+          class="timer-toggle"
+          type="button"
+          :aria-pressed="showElapsed"
+          :aria-label="`経過時間表示を${showElapsed ? 'OFF' : 'ON'}にする`"
+          @click="showElapsed = !showElapsed"
+        >時間表示 {{ showElapsed ? 'ON' : 'OFF' }}</button>
       </div>
     </div>
   </section>
 </template>
 
 <style scoped>
-.ants-question { display: grid; grid-template-rows: 302px 38px; gap: 8px; height: 348px; color: #17375f; }
+.ants-question { display: grid; grid-template-rows: 302px 38px; gap: 8px; width: 100%; height: 348px; color: #17375f; }
 .ants-stage { position: relative; height: 302px; overflow: hidden; border: 1px solid #d5e3f2; border-radius: 18px; background: radial-gradient(ellipse at 50% 52%, #fff 0, #f7faff 68%, #eef5fd 100%); }
 .length-marker { position: absolute; top: 15px; left: 6%; width: 88%; height: 38px; color: #7187a2; }
 .measure-line { position: absolute; top: 11px; left: 0; width: 100%; border-top: 1px solid #a8bfd9; }
@@ -203,9 +221,9 @@ onBeforeUnmount(() => cancelAnimationFrame(frame))
 .left-end { left: 0; }
 .right-end { right: 0; }
 .length-marker b { position: absolute; top: 17px; left: 50%; transform: translateX(-50%); padding: 0 9px; background: #f8fbff; color: #6f86a2; font-size: 11px; font-weight: 600; white-space: nowrap; }
-.fall-label { position: absolute; top: 87px; z-index: 1; color: #8a9db4; font-size: 11px; }
-.left-label { left: 1.8%; }
-.right-label { right: 1.8%; }
+.elapsed-readout { position: absolute; top: 59px; right: 18px; z-index: 2; display: flex; align-items: baseline; gap: 8px; padding: 4px 10px; border: 1px solid #d5e3f2; border-radius: 9px; color: #607995; background: #ffffffed; font-size: 10px; box-shadow: 0 3px 10px #54759a12; }
+.elapsed-readout strong { color: #245b9e; font: 700 14px/1 Arial,sans-serif; font-variant-numeric: tabular-nums; }
+.elapsed-readout small { margin-left: 2px; font-size: 9px; }
 .rod { position: absolute; top: 170px; left: 6%; width: 88%; height: 20px; border: 1px solid #87a7cd; border-radius: 13px; background: linear-gradient(180deg, #deecfb, #c4dcf5); box-shadow: 0 8px 18px #b9d1eb38; }
 .ruler { position: absolute; top: 191px; left: 6%; width: 88%; height: 38px; }
 .end-tick { position: absolute; top: 0; height: 9px; border-left: 1px solid #7494b9; }
@@ -234,6 +252,12 @@ onBeforeUnmount(() => cancelAnimationFrame(frame))
 .runner.turning { z-index: 4; }
 .runner.turning .runner-id { box-shadow: 0 0 0 3px #fff, 0 0 0 5px #ffc15e; }
 .ant-turn { display: flex; transform-origin: center center; }
+.point-mark { position: absolute; top: 58px; left: 50%; width: 18px; height: 18px; transform: translateX(-50%); border: 3px solid #fff; border-radius: 50%; box-shadow: 0 3px 8px #17375f35; }
+.blue .point-mark { background: #347ac4; }
+.coral .point-mark { background: #d96d62; }
+.mint .point-mark { background: #288a70; }
+.violet .point-mark { background: #795fba; }
+.gold .point-mark { background: #aa7410; }
 .impact { position: absolute; top: 141px; z-index: 3; transform: translateX(-50%); color: #f3a449; font-size: 29px; line-height: 1; animation: pop .42s ease-out forwards; pointer-events: none; }
 .control-bar { display: flex; align-items: center; justify-content: space-between; }
 .ant-legend, .transport-controls { display: flex; align-items: center; gap: 6px; }
@@ -244,6 +268,7 @@ onBeforeUnmount(() => cancelAnimationFrame(frame))
 .transport-controls .play-button { color: white; border-color: #2f6fed; background: #2f6fed; }
 .transport-controls button:disabled { opacity: .45; cursor: default; }
 .transport-controls button:focus-visible { outline: 3px solid #8cb8f1; outline-offset: 2px; }
+.transport-controls .timer-toggle { min-width: 100px; color: #315c91; background: #f7faff; }
 @keyframes pop { 0% { opacity: 0; transform: translateX(-50%) scale(.5); } 25% { opacity: 1; transform: translateX(-50%) scale(1.25); } 100% { opacity: 0; transform: translateX(-50%) scale(.8); } }
 @media (prefers-reduced-motion: reduce) { .runner, .impact { transition: none; animation-duration: .01ms; } }
 </style>
