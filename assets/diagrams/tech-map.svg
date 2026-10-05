@@ -1,6 +1,6 @@
 <svg class="tech-map-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1030 710" role="img" aria-labelledby="title desc">
   <title id="title">技術領域マップ</title>
-  <desc id="desc">tech_map.mdの表に基づき、5つの技術領域への所属を四角形の重なりで示す。</desc>
+  <desc id="desc">代表的な技術分野への所属を四角形の重なりで示す。</desc>
   <style>
     .tech-map-svg text { font-family: Inter, "Noto Sans JP", "Hiragino Sans", sans-serif; }
     .tech-map-svg .bg { fill: #0f172a; }
@@ -22,7 +22,6 @@
   </style>
 
   <rect class="bg" width="1030" height="710" />
-  <text class="title" x="30" y="48">技術領域マップ</text>
 
   <rect class="area cs" x="20" y="180" width="630" height="400" rx="16" />
   <rect class="area cp" x="200" y="265" width="650" height="315" rx="16" />

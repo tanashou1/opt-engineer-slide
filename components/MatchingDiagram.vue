@@ -1,216 +1,213 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onUnmounted, ref } from 'vue'
 
 const phase = ref(0)
 const playing = ref(false)
 let timer
 
-const boardX = 37
-const boardY = 151
-const cellSize = 58
+const boardX = 42
+const boardY = 83
+const cellSize = 60
 const cellPitch = 64
-const boardLabels = ['A₁', 'B₁', 'A₂', 'B₂', 'A₃', 'B₃', 'A₄', 'B₄', 'A₅']
-const cells = computed(() => Array.from({ length: 9 }, (_, id) => ({
-  id,
-  row: Math.floor(id / 3),
-  col: id % 3,
-  isA: (Math.floor(id / 3) + id % 3) % 2 === 0,
-  x: boardX + (id % 3) * cellPitch,
-  y: boardY + Math.floor(id / 3) * cellPitch,
-  label: boardLabels[id],
-})))
+const blockedCells = new Set([1, 8, 16, 24])
+const subscript = value => String(value).replace(/\d/g, digit => '₀₁₂₃₄₅₆₇₈₉'[Number(digit)])
 
-const aNodes = [
-  { id: 'A1', label: 'A₁', x: 485, y: 116 },
-  { id: 'A2', label: 'A₂', x: 485, y: 174 },
-  { id: 'A3', label: 'A₃', x: 485, y: 232 },
-  { id: 'A4', label: 'A₄', x: 485, y: 290 },
-  { id: 'A5', label: 'A₅', x: 485, y: 348 },
-]
-const bNodes = [
-  { id: 'B1', label: 'B₁', x: 715, y: 145 },
-  { id: 'B2', label: 'B₂', x: 715, y: 213 },
-  { id: 'B3', label: 'B₃', x: 715, y: 281 },
-  { id: 'B4', label: 'B₄', x: 715, y: 349 },
-]
-const source = { id: 'S', label: 'S', x: 310, y: 232 }
-const sink = { id: 'T', label: 'T', x: 875, y: 232 }
-const graphNodes = [...aNodes.map(node => ({ ...node, kind: 'a' })), ...bNodes.map(node => ({ ...node, kind: 'b' })), { ...source, kind: 'terminal' }, { ...sink, kind: 'terminal' }]
-const adjacency = [
-  ['A1', 'B1'], ['A1', 'B2'],
-  ['A2', 'B1'], ['A2', 'B3'],
-  ['A3', 'B1'], ['A3', 'B2'], ['A3', 'B3'], ['A3', 'B4'],
-  ['A4', 'B2'], ['A4', 'B4'],
-  ['A5', 'B3'], ['A5', 'B4'],
-]
-const pointById = Object.fromEntries(graphNodes.map(node => [node.id, node]))
-const graphEdges = [
-  ...aNodes.map((node, i) => ({ id: `s-a${i + 1}`, from: source, to: node })),
-  ...adjacency.map(([a, b]) => ({ id: `${a.toLowerCase()}-${b.toLowerCase()}`, from: pointById[a], to: pointById[b] })),
-  ...bNodes.map((node, i) => ({ id: `b${i + 1}-t`, from: node, to: sink })),
-].map(edge => {
-  const startX = edge.from.x + 25
-  const endX = edge.to.x - 25
-  const span = endX - startX
+let countA = 0
+let countB = 0
+const cells = Array.from({ length: 25 }, (_, cellId) => {
+  const row = Math.floor(cellId / 5)
+  const col = cellId % 5
+  const isObstacle = blockedCells.has(cellId)
+  const isA = (row + col) % 2 === 0
+  const sideIndex = isObstacle ? 0 : isA ? ++countA : ++countB
   return {
-    ...edge,
-    d: `M ${startX} ${edge.from.y} C ${startX + span * .36} ${edge.from.y}, ${endX - span * .36} ${edge.to.y}, ${endX} ${edge.to.y}`,
+    id: cellId,
+    row,
+    col,
+    isObstacle,
+    isA,
+    label: isObstacle ? '×' : `${isA ? 'A' : 'B'}${subscript(sideIndex)}`,
+    x: boardX + col * cellPitch,
+    y: boardY + row * cellPitch,
   }
 })
-const visibleGraphEdges = computed(() => phase.value === 0
-  ? graphEdges.filter(edge => edge.from.id !== 'S' && edge.to.id !== 'T')
-  : graphEdges)
-const visibleGraphNodes = computed(() => phase.value === 0
-  ? graphNodes.filter(node => node.kind !== 'terminal')
-  : graphNodes)
 
-const firstFlow = ['s-a3', 'a3-b1', 'b1-t']
-const reroutedFlow = ['s-a1', 'a1-b1', 'b1-t', 's-a3', 'a3-b2', 'b2-t']
+const freeCells = cells.filter(cell => !cell.isObstacle)
+const aNodes = freeCells.filter(cell => cell.isA).map((cell, index) => ({
+  id: `a-${cell.id}`,
+  cellId: cell.id,
+  label: `A${subscript(index + 1)}`,
+  x: 693,
+  y: 101 + index * 29,
+  kind: 'a',
+}))
+const bNodes = freeCells.filter(cell => !cell.isA).map((cell, index) => ({
+  id: `b-${cell.id}`,
+  cellId: cell.id,
+  label: `B${subscript(index + 1)}`,
+  x: 1000,
+  y: 94 + index * 27.5,
+  kind: 'b',
+}))
+const source = { id: 'S', label: 'S', x: 535, y: 245, kind: 'terminal' }
+const sink = { id: 'T', label: 'T', x: 1175, y: 245, kind: 'terminal' }
+const aByCell = new Map(aNodes.map(node => [node.cellId, node]))
+const bByCell = new Map(bNodes.map(node => [node.cellId, node]))
+const neighborIds = cell => [
+  [cell.row - 1, cell.col], [cell.row + 1, cell.col],
+  [cell.row, cell.col - 1], [cell.row, cell.col + 1],
+].filter(([row, col]) => row >= 0 && row < 5 && col >= 0 && col < 5)
+  .map(([row, col]) => row * 5 + col)
+  .filter(id => !blockedCells.has(id))
+
+const candidates = aNodes.flatMap(from => neighborIds(cells[from.cellId])
+  .map(cellId => bByCell.get(cellId))
+  .filter(Boolean)
+  .map(to => ({ id: `${from.id}-${to.id}`, from, to })))
+
+const selectedCellPairs = [
+  [0, 5], [2, 3], [12, 7], [4, 9], [6, 11],
+  [18, 13], [10, 15], [22, 17], [14, 19], [20, 21],
+].map(([aCell, bCell]) => ({ a: aByCell.get(aCell), b: bByCell.get(bCell) }))
+const maxFlow = selectedCellPairs.length
+const activeCount = computed(() => [0, 1, 4, maxFlow][phase.value])
+const activePairs = computed(() => selectedCellPairs.slice(0, activeCount.value))
+const activeNodeIds = computed(() => new Set(activePairs.value.flatMap(pair => [pair.a.id, pair.b.id])))
+const activeEdgeIds = computed(() => new Set(activePairs.value.map(pair => `${pair.a.id}-${pair.b.id}`)))
+const activeSourceIds = computed(() => new Set(activePairs.value.map(pair => pair.a.id)))
+const activeSinkIds = computed(() => new Set(activePairs.value.map(pair => pair.b.id)))
+const graphNodes = [...aNodes, ...bNodes]
+const visibleNodes = computed(() => phase.value === 0 ? graphNodes : [source, ...graphNodes, sink])
+const sourceEdges = aNodes.map(to => ({ id: `S-${to.id}`, from: source, to }))
+const sinkEdges = bNodes.map(from => ({ id: `${from.id}-T`, from, to: sink }))
+const terminalEdges = computed(() => phase.value === 0 ? [] : [...sourceEdges, ...sinkEdges])
+
+const edgePath = edge => {
+  const startX = edge.from.x + (edge.from.kind === 'terminal' ? 15 : 14)
+  const endX = edge.to.x - (edge.to.kind === 'terminal' ? 15 : 14)
+  const middleX = (startX + endX) / 2
+  return `M ${startX} ${edge.from.y} C ${middleX} ${edge.from.y}, ${middleX} ${edge.to.y}, ${endX} ${edge.to.y}`
+}
 const flowEdges = computed(() => {
-  if (phase.value === 1 || phase.value === 2) return firstFlow
-  if (phase.value === 3) return [...reroutedFlow, 's-a2', 'a2-b3', 'b3-t']
-  if (phase.value === 4) return [...reroutedFlow, 's-a2', 'a2-b3', 'b3-t', 's-a4', 'a4-b4', 'b4-t']
-  return []
+  if (phase.value === 0) return []
+  return [
+    ...candidates.filter(edge => activeEdgeIds.value.has(edge.id)),
+    ...sourceEdges.filter(edge => activeSourceIds.value.has(edge.to.id)),
+    ...sinkEdges.filter(edge => activeSinkIds.value.has(edge.from.id)),
+  ]
 })
-const augmentEdges = computed(() => {
-  if (phase.value === 2) return ['s-a1', 'a1-b1', 'a3-b2', 'b2-t']
-  if (phase.value === 3) return ['s-a2', 'a2-b3', 'b3-t']
-  if (phase.value === 4) return ['s-a4', 'a4-b4', 'b4-t']
-  return []
-})
-const flowNodes = computed(() => {
-  if (phase.value === 1) return ['S', 'A3', 'B1', 'T']
-  if (phase.value === 2) return ['S', 'A1', 'A3', 'B1', 'B2', 'T']
-  if (phase.value === 3) return ['S', 'A1', 'A2', 'A3', 'B1', 'B2', 'B3', 'T']
-  if (phase.value === 4) return graphNodes.map(node => node.id)
-  return []
-})
-const flowValue = computed(() => phase.value === 0 ? '—' : ['0', '1', '1 → 2', '3', '4 / 最大'][phase.value])
-const stepLabel = computed(() => ['再生前', '1組目を確保', '増加路で付け替え', '3組目を追加', '最大流に到達'][phase.value])
+const pairFrames = computed(() => activePairs.value.map((pair, index) => {
+  const first = cells[pair.a.cellId]
+  const second = cells[pair.b.cellId]
+  const minCol = Math.min(first.col, second.col)
+  const minRow = Math.min(first.row, second.row)
+  const maxCol = Math.max(first.col, second.col)
+  const maxRow = Math.max(first.row, second.row)
+  return {
+    id: `pair-${index}`,
+    x: boardX + minCol * cellPitch - 2,
+    y: boardY + minRow * cellPitch - 2,
+    width: (maxCol - minCol) * cellPitch + cellSize + 4,
+    height: (maxRow - minRow) * cellPitch + cellSize + 4,
+  }
+}))
+const flowValue = computed(() => phase.value === 0 ? '—' : String(activeCount.value))
+const stepLabel = computed(() => [
+  '盤面を二部グラフにする',
+  '置けるペアに1単位流す',
+  'ペアを増やして流量を上げる',
+  '最大流10 ＝ 2マス枠10台',
+][phase.value])
 const stepText = computed(() => [
-  '再生を押すと、最大流の流れが動き始めます。',
-  'S → A₃ → B₁ → T に1単位流す。',
-  '残余辺 B₁ → A₃ を使って組み替え、流量を2に増やす。',
-  'S → A₂ → B₃ → T に流し、流量3へ。',
-  'S → A₄ → B₄ → T に流す。B側4ノードを使い切り、最大流4。',
+  '隣り合う空きマスは、必ずA側とB側に分かれる。',
+  'A₁―B₂の辺を選び、2マス枠を1台置く。',
+  '各マスは1回だけ使う。重ならない辺を追加する。',
+  '各辺の容量を1にした最大流で、配置数の上限を求める。',
 ][phase.value])
 
-const resultGridX = 1002
-const resultGridY = 151
-const tileSize = 68
-const tilePitch = 74
-const resultCells = Array.from({ length: 9 }, (_, id) => ({
-  id,
-  x: resultGridX + (id % 3) * tilePitch,
-  y: resultGridY + Math.floor(id / 3) * tilePitch,
-}))
-const tiles = [
-  { id: 'pair1', x: resultGridX, y: resultGridY, width: tileSize * 2 + 6, height: tileSize, cells: ['A₁', 'B₁'], horizontal: true, color: '#2f6fed' },
-  { id: 'pair2', x: resultGridX + tilePitch * 2, y: resultGridY, width: tileSize, height: tileSize * 2 + 6, cells: ['A₂', 'B₃'], horizontal: false, color: '#478dae' },
-  { id: 'pair3', x: resultGridX, y: resultGridY + tilePitch, width: tileSize * 2 + 6, height: tileSize, cells: ['B₂', 'A₃'], horizontal: true, color: '#707dc3' },
-  { id: 'pair4', x: resultGridX, y: resultGridY + tilePitch * 2, width: tileSize * 2 + 6, height: tileSize, cells: ['A₄', 'B₄'], horizontal: true, color: '#28589c' },
-]
-
-function advance() { phase.value = phase.value >= 4 ? 1 : phase.value + 1 }
-function start() {
+function pausePlayback() {
+  playing.value = false
   if (timer) window.clearInterval(timer)
-  timer = window.setInterval(advance, 2600)
+  timer = undefined
+}
+function advance() {
+  phase.value = Math.min(phase.value + 1, 3)
+  if (phase.value === 3) pausePlayback()
 }
 function togglePlayback() {
   if (playing.value) {
-    playing.value = false
-    if (timer) window.clearInterval(timer)
+    pausePlayback()
     return
   }
   playing.value = true
-  if (phase.value === 0) phase.value = 1
-  start()
+  if (phase.value === 0 || phase.value === 3) phase.value = 1
+  timer = window.setInterval(advance, 2600)
 }
 function restart() {
-  if (playing.value) {
-    phase.value = 1
-    start()
-  } else {
-    phase.value = 0
-  }
+  pausePlayback()
+  phase.value = 0
 }
 
-onMounted(() => { if (playing.value) start() })
-onUnmounted(() => { if (timer) window.clearInterval(timer) })
+onUnmounted(pausePlayback)
 </script>
 
 <template>
   <div class="matching-demo">
-    <svg class="matching-svg" viewBox="0 0 1280 465" role="img" aria-label="再生前はA・Bの二部グラフを表示し、再生後にS・Tを加えて最大流を求め、右側に4組のマッチング結果を示す図">
+    <svg class="matching-svg" viewBox="0 0 1280 500" role="img" aria-label="障害物のある5×5盤面を二色に塗り分け、同時に置ける隣接マスを辺で結んで最大流・最大マッチングとして解く図">
       <defs>
-        <marker id="arrow-muted" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0 L7 3.5 L0 7 Z" fill="#aebdd1" /></marker>
-        <marker id="arrow-flow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0 L7 3.5 L0 7 Z" fill="#2f6fed" /></marker>
-        <marker id="arrow-augment" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0 L7 3.5 L0 7 Z" fill="#ef8d43" /></marker>
+        <marker id="match-arrow-muted" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0 L7 3.5 L0 7 Z" fill="#aebdd1" /></marker>
+        <marker id="match-arrow-flow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0 L7 3.5 L0 7 Z" fill="#2f6fed" /></marker>
       </defs>
 
-      <text x="23" y="39" class="panel-title">3×3盤面</text>
-      <text x="23" y="62" class="panel-subtitle">全9マスをA側・B側に分類</text>
-      <text v-for="n in 3" :key="`col-${n}`" :x="boardX + (n - 1) * cellPitch + cellSize / 2" y="141" class="grid-number" text-anchor="middle">{{ n }}</text>
-      <text v-for="n in 3" :key="`row-${n}`" x="25" :y="boardY + (n - 1) * cellPitch + 33" class="grid-number" text-anchor="middle">{{ n }}</text>
-      <rect x="31" y="144" width="200" height="200" rx="8" class="board-frame" />
+      <text x="28" y="34" class="panel-title board-title">5×5盤面を2色に分ける</text>
+      <text x="29" y="59" class="panel-subtitle">空きマスはA・Bに交互に分かれる</text>
+      <rect x="35" y="76" width="332" height="332" rx="11" class="board-frame" />
       <g v-for="cell in cells" :key="cell.id">
-        <rect :x="cell.x" :y="cell.y" :width="cellSize" :height="cellSize" rx="5" :class="['board-cell', cell.isA ? 'cell-a' : 'cell-b']" />
-        <text :x="cell.x + cellSize / 2" :y="cell.y + 36" text-anchor="middle" :class="['cell-label', cell.isA ? 'label-a' : 'label-b']">{{ cell.label }}</text>
+        <rect :x="cell.x" :y="cell.y" :width="cellSize" :height="cellSize" rx="5" :class="['board-cell', cell.isObstacle ? 'cell-obstacle' : cell.isA ? 'cell-a' : 'cell-b']" />
       </g>
-      <rect x="28" y="380" width="16" height="16" rx="3" class="legend-a" /><text x="52" y="393" class="legend-label">A側</text>
-      <rect x="112" y="380" width="16" height="16" rx="3" class="legend-b" /><text x="136" y="393" class="legend-label">B側</text>
+      <g v-for="frame in pairFrames" :key="frame.id">
+        <rect :x="frame.x" :y="frame.y" :width="frame.width" :height="frame.height" rx="9" class="matched-pair" />
+      </g>
+      <g v-for="cell in cells" :key="`label-${cell.id}`">
+        <text :x="cell.x + cellSize / 2" :y="cell.y + 36" text-anchor="middle" :class="['cell-label', cell.isObstacle ? 'obstacle-label' : cell.isA ? 'label-a' : 'label-b']">{{ cell.label }}</text>
+      </g>
+      <rect x="46" y="424" width="18" height="18" rx="4" class="legend-a" /><text x="72" y="439" class="legend-label">A側</text>
+      <rect x="143" y="424" width="18" height="18" rx="4" class="legend-b" /><text x="169" y="439" class="legend-label">B側</text>
+      <rect x="247" y="424" width="18" height="18" rx="4" class="legend-obstacle" /><text x="273" y="439" class="legend-label">障害物</text>
 
-      <text x="267" y="39" class="panel-title">マッチング問題を最大流問題として解く</text>
-      <text x="267" y="62" class="panel-subtitle">二部マッチング問題は、最大流として効率的に解ける。</text>
+      <text x="824" y="34" text-anchor="middle" class="panel-title">最大マッチングを最大流問題として解く</text>
+      <text x="693" y="73" text-anchor="middle" class="side-label">A側のマス</text>
+      <text x="1000" y="73" text-anchor="middle" class="side-label">B側のマス</text>
       <g v-if="phase > 0" class="flow-badge">
-        <rect x="782" y="21" width="112" height="49" rx="11" />
-        <text x="796" y="41" class="badge-caption">流量</text>
-        <text x="852" y="62" text-anchor="middle" class="badge-value">{{ flowValue }}</text>
-      </g>
-      <text x="485" y="91" text-anchor="middle" class="side-label">A側</text>
-      <text x="715" y="91" text-anchor="middle" class="side-label">B側</text>
-      <text v-if="phase > 0" x="600" y="389" text-anchor="middle" class="network-note">S → A → B → T の流量 ＝ 選べるペア数 ／ 各辺の容量は1</text>
-
-      <g class="network-edges">
-        <path v-for="edge in visibleGraphEdges" :key="edge.id" :d="edge.d" class="edge-candidate" :marker-end="'url(#arrow-muted)'" />
-        <path v-for="edge in visibleGraphEdges.filter(e => flowEdges.includes(e.id))" :key="`flow-${edge.id}`" :d="edge.d" class="edge-flow" :marker-end="'url(#arrow-flow)'" />
-        <path v-for="edge in visibleGraphEdges.filter(e => augmentEdges.includes(e.id))" :key="`augment-${edge.id}`" :d="edge.d" class="edge-augment" :marker-end="'url(#arrow-augment)'" />
-        <path v-if="phase === 2" d="M 690 137 C 630 148 575 205 510 232" class="edge-reverse" :marker-end="'url(#arrow-augment)'" />
+        <rect x="1103" y="46" width="111" height="42" rx="10" />
+        <text x="1115" y="72" class="badge-caption">流量</text>
+        <text x="1184" y="74" text-anchor="middle" class="badge-value">{{ flowValue }}</text>
       </g>
 
-      <g v-for="node in visibleGraphNodes" :key="node.id" :class="['network-node', `node-${node.kind}`, { 'node-in-flow': flowNodes.includes(node.id) }]">
-        <circle :cx="node.x" :cy="node.y" r="22" />
-        <text :x="node.x" :y="node.y + 5" text-anchor="middle">{{ node.label }}</text>
+      <g class="candidate-edges">
+        <path v-for="edge in candidates" :key="edge.id" :d="edgePath(edge)" class="edge-candidate" />
       </g>
-      <text v-if="phase > 0" x="310" y="269" text-anchor="middle" class="terminal-label">source</text>
-      <text v-if="phase > 0" x="875" y="269" text-anchor="middle" class="terminal-label">sink</text>
-
-      <text x="948" y="39" class="panel-title">マッチング結果</text>
-      <text x="948" y="62" class="panel-subtitle">4組をタイルに戻す</text>
-      <g>
-        <rect v-for="cell in resultCells" :key="cell.id" :x="cell.x" :y="cell.y" :width="tileSize" :height="tileSize" rx="7" class="result-cell" />
-        <g v-for="tile in tiles" :key="tile.id">
-          <rect :x="tile.x" :y="tile.y" :width="tile.width" :height="tile.height" rx="9" :fill="tile.color" class="result-tile" />
-          <line v-if="tile.horizontal" :x1="tile.x + tileSize + 3" :x2="tile.x + tileSize + 3" :y1="tile.y + 8" :y2="tile.y + tile.height - 8" class="tile-divider" />
-          <line v-else :x1="tile.x + 8" :x2="tile.x + tile.width - 8" :y1="tile.y + tileSize + 3" :y2="tile.y + tileSize + 3" class="tile-divider" />
-          <text v-if="tile.horizontal" :x="tile.x + tileSize / 2" :y="tile.y + tile.height / 2 + 4" text-anchor="middle" class="tile-label">{{ tile.cells[0] }}</text>
-          <text v-if="tile.horizontal" :x="tile.x + tileSize + 6 + tileSize / 2" :y="tile.y + tile.height / 2 + 4" text-anchor="middle" class="tile-label">{{ tile.cells[1] }}</text>
-          <text v-if="!tile.horizontal" :x="tile.x + tile.width / 2" :y="tile.y + tileSize / 2 + 4" text-anchor="middle" class="tile-label">{{ tile.cells[0] }}</text>
-          <text v-if="!tile.horizontal" :x="tile.x + tile.width / 2" :y="tile.y + tileSize + 6 + tileSize / 2 + 4" text-anchor="middle" class="tile-label">{{ tile.cells[1] }}</text>
-        </g>
-        <text :x="resultGridX + tilePitch * 2 + tileSize / 2" :y="resultGridY + tilePitch * 2 + 40" text-anchor="middle" class="unmatched-label">A₅</text>
+      <g v-if="phase > 0" class="terminal-edges">
+        <path v-for="edge in terminalEdges" :key="edge.id" :d="edgePath(edge)" class="edge-terminal" marker-end="url(#match-arrow-muted)" />
       </g>
-      <text x="1112" y="393" text-anchor="middle" class="result-caption">4ペアを配置、A₅が1マス残る</text>
+      <g class="active-edges">
+        <path v-for="edge in flowEdges" :key="`active-${edge.id}`" :d="edgePath(edge)" class="edge-active" marker-end="url(#match-arrow-flow)" />
+      </g>
+      <g v-for="node in visibleNodes" :key="node.id" :class="['network-node', `node-${node.kind}`, { 'node-selected': activeNodeIds.has(node.id) }]">
+        <circle :cx="node.x" :cy="node.y" :r="node.kind === 'terminal' ? 17 : 15" />
+        <text :x="node.x" :y="node.y + 4" text-anchor="middle">{{ node.label }}</text>
+      </g>
+      <text x="855" y="424" text-anchor="middle" class="network-note">各辺の容量1 · 最大流＝重ならずに置ける枠数</text>
 
-      <rect x="267" y="407" width="627" height="47" rx="11" class="step-card" />
-      <circle v-if="phase > 0" cx="289" cy="430" r="13" class="step-number" />
-      <text v-if="phase > 0" x="289" y="434" text-anchor="middle" class="step-number-text">{{ phase }}</text>
-      <text x="311" y="426" class="step-label">{{ stepLabel }}</text>
-      <text x="311" y="443" class="step-copy">{{ stepText }}</text>
+      <rect x="28" y="451" width="1224" height="43" rx="10" class="step-card" />
+      <circle v-if="phase > 0" cx="51" cy="472" r="13" class="step-number" />
+      <text v-if="phase > 0" x="51" y="477" text-anchor="middle" class="step-number-text">{{ phase }}</text>
+      <text :x="phase > 0 ? 74 : 48" y="470" class="step-label">{{ stepLabel }}</text>
+      <text :x="phase > 0 ? 74 : 48" y="488" class="step-copy">{{ stepText }}</text>
     </svg>
 
     <div class="matching-controls">
-      <span class="animation-indicator"><i :class="{ running: playing }"></i>{{ playing ? '最大流の流れを再生中' : phase === 0 ? '再生待ち' : '一時停止中' }}</span>
+      <span class="animation-indicator"><i :class="{ running: playing }"></i>{{ playing ? '再生中' : phase === 0 ? '再生待ち' : '一時停止中' }}</span>
       <div class="matching-buttons">
         <button type="button" @click="togglePlayback">{{ playing ? '一時停止' : '再生' }}</button>
         <button type="button" @click="restart">最初から</button>
@@ -222,51 +219,48 @@ onUnmounted(() => { if (timer) window.clearInterval(timer) })
 <style scoped>
 .matching-demo { width: 100%; color: #234369; }
 .matching-svg { display: block; width: 100%; height: auto; overflow: visible; font-family: 'Noto Sans JP', sans-serif; }
-.panel-title { fill: #234369; font-size: 22px; font-weight: 750; }
-.panel-subtitle { fill: #7186a2; font-size: 15px; }
-.grid-number { fill: #8b9db6; font-size: 14px; }
+.panel-title { fill: #234369; font-size: 25px; font-weight: 800; }
+.board-title { font-size: 27px; }
+.panel-subtitle { fill: #7186a2; font-size: 17px; }
 .board-frame { fill: #f4f7fc; stroke: #d7e1ef; stroke-width: 1.5; }
-.board-cell { stroke: #fff; stroke-width: 2; }
-.cell-a, .legend-a { fill: #4b78b9; }
+.board-cell { stroke: #fff; stroke-width: 3; }
+.cell-a, .legend-a { fill: #3976c6; }
 .cell-b, .legend-b { fill: #dce9fa; }
-.cell-label { font-size: 19px; font-weight: 800; }
+.cell-obstacle, .legend-obstacle { fill: #000; }
+.cell-label { font-size: 18px; font-weight: 800; }
 .label-a { fill: #fff; }
 .label-b { fill: #244b7d; }
-.legend-b { stroke: #bfd0e7; }
-.legend-label { fill: #6f83a0; font-size: 14px; }
+.obstacle-label { fill: #fff; font-size: 24px; }
+.matched-pair { fill: #f6a443; fill-opacity: .13; stroke: #e68a2e; stroke-width: 4; }
+.legend-label { fill: #526d8f; font-size: 17px; font-weight: 650; }
+.side-label { fill: #4e6f9b; font-size: 18px; font-weight: 750; }
+.edge-candidate, .edge-terminal, .edge-active { fill: none; stroke-linecap: round; }
+.edge-candidate { stroke: #91a4bc; stroke-opacity: .43; stroke-width: 1.5; }
+.edge-terminal { stroke: #bbc8d7; stroke-width: 1.3; }
+.edge-active { stroke: #2f6fed; stroke-width: 3.5; }
+.network-node circle { fill: #fff; stroke: #aebdd1; stroke-width: 1.5; }
+.network-node text { fill: #587293; font-size: 13px; font-weight: 750; }
+.network-node.node-a circle { fill: #3976c6; stroke: #285b9c; }
+.network-node.node-a text { fill: #fff; }
+.network-node.node-b circle { fill: #dce9fa; stroke: #aec7e6; }
+.network-node.node-b text { fill: #244b7d; }
+.network-node.node-terminal circle { fill: #fff; stroke: #91a6c2; stroke-width: 2; }
+.network-node.node-terminal text { fill: #234369; font-size: 18px; }
+.network-node.node-selected circle { stroke: #ed8b31; stroke-width: 3; }
 .flow-badge rect { fill: #edf4ff; stroke: #d1e1fa; }
-.badge-caption { fill: #6981a1; font-size: 12px; }
-.badge-value { fill: #2867c2; font-size: 16px; font-weight: 800; }
-.network-note { fill: #8394aa; font-size: 14px; }
-.side-label { fill: #4e6f9b; font-size: 14px; font-weight: 750; }
-.edge-candidate, .edge-flow, .edge-augment, .edge-reverse { fill: none; stroke-width: 2; stroke-linecap: round; transition: stroke .25s ease; }
-.edge-candidate { stroke: #c7d3e2; }
-.edge-flow { stroke: #2f6fed; }
-.edge-augment, .edge-reverse { stroke: #ef8d43; }
-.network-node circle { fill: #fff; stroke: #aebdd1; stroke-width: 1.7; transition: fill .25s, stroke .25s; }
-.network-node text { fill: #657d9d; font-size: 15px; font-weight: 750; transition: fill .25s; }
-.network-node.node-a circle { fill: #e9f1fc; stroke: #9fbce2; }
-.network-node.node-b circle { fill: #f6f9fe; stroke: #b6c8df; }
-.network-node.node-terminal circle { fill: #eef3fa; stroke: #91a6c2; }
-.network-node.node-in-flow circle { fill: #2f6fed; stroke: #1f56b8; }
-.network-node.node-in-flow text { fill: #fff; }
-.terminal-label { fill: #8394aa; font-size: 11px; }
+.badge-caption { fill: #6981a1; font-size: 16px; }
+.badge-value { fill: #2867c2; font-size: 19px; font-weight: 800; }
+.network-note { fill: #6f83a0; font-size: 17px; font-weight: 650; }
 .step-card { fill: #f5f8fd; stroke: #e1e9f4; }
 .step-number { fill: #2f6fed; }
-.step-number-text { fill: #fff; font-size: 13px; font-weight: 800; }
-.step-label { fill: #2d558a; font-size: 13px; font-weight: 750; }
-.step-copy { fill: #607998; font-size: 12px; }
-.result-cell { fill: #eef3f9; stroke: #dae3ef; stroke-width: 1.5; }
-.result-tile { stroke: #fff; stroke-width: 2; }
-.tile-divider { stroke: #fff; stroke-width: 2; stroke-opacity: .8; }
-.tile-label { fill: #fff; font-size: 15px; font-weight: 750; }
-.unmatched-label { fill: #7186a2; font-size: 16px; font-weight: 750; }
-.result-caption { fill: #6f83a0; font-size: 13px; }
+.step-number-text { fill: #fff; font-size: 17px; font-weight: 800; }
+.step-label { fill: #2d558a; font-size: 16px; font-weight: 750; }
+.step-copy { fill: #607998; font-size: 15px; }
 .matching-controls { display: flex; align-items: center; justify-content: center; gap: 14px; min-height: 34px; margin-top: 2px; }
-.animation-indicator { display: inline-flex; align-items: center; gap: 8px; color: #6a7f9b; font-size: 13px; }
+.animation-indicator { display: inline-flex; align-items: center; gap: 8px; color: #6a7f9b; font-size: 18px; }
 .animation-indicator i { width: 8px; height: 8px; border-radius: 50%; background: #aebdd1; }
 .animation-indicator i.running { background: #2f6fed; }
 .matching-buttons { display: flex; gap: 7px; }
-.matching-buttons button { min-width: 78px; padding: 7px 13px; border: 1px solid #cfdbeb; border-radius: 6px; color: #42628a; background: #fff; font-family: inherit; font-size: 13px; font-weight: 600; line-height: 1.2; cursor: pointer; }
+.matching-buttons button { min-width: 78px; padding: 7px 13px; border: 1px solid #cfdbeb; border-radius: 6px; color: #42628a; background: #fff; font-family: inherit; font-size: 18px; font-weight: 600; line-height: 1.2; cursor: pointer; }
 .matching-buttons button:hover { border-color: #8eb4ef; background: #f4f8ff; }
 </style>

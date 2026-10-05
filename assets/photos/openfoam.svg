@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 180" role="img" aria-labelledby="title desc">
+  <title id="title">OpenFOAMによる流体解析のイメージ</title>
+  <desc id="desc">ParaView風の画面に、障害物を越える流れを速度の色で表示した模式図</desc>
+  <defs>
+    <linearGradient id="heat" x1="0" x2="1">
+      <stop stop-color="#1d4ed8"/>
+      <stop offset=".38" stop-color="#06b6d4"/>
+      <stop offset=".68" stop-color="#facc15"/>
+      <stop offset="1" stop-color="#ef4444"/>
+    </linearGradient>
+    <clipPath id="view"><rect x="56" y="32" width="174" height="137" rx="4"/></clipPath>
+  </defs>
+  <rect width="240" height="180" rx="12" fill="#182434"/>
+  <rect width="240" height="23" rx="12" fill="#26374b"/>
+  <path d="M0 16h240v7H0z" fill="#26374b"/>
+  <circle cx="12" cy="11" r="3" fill="#fb7185"/><circle cx="23" cy="11" r="3" fill="#fbbf24"/><circle cx="34" cy="11" r="3" fill="#34d399"/>
+  <text x="49" y="15" fill="#e7eef8" font-family="Arial,sans-serif" font-size="9" font-weight="700">OpenFOAM · ParaView</text>
+  <rect x="8" y="32" width="42" height="137" rx="4" fill="#26374b"/>
+  <text x="13" y="45" fill="#a9bfd9" font-family="Arial,sans-serif" font-size="7">Pipeline</text>
+  <path d="M14 54h5v5h-5zm8 2h22M14 67h5v5h-5zm8 2h18M14 80h5v5h-5zm8 2h14" fill="none" stroke="#8da8c6" stroke-width="2"/>
+  <g clip-path="url(#view)">
+    <rect x="56" y="32" width="174" height="137" fill="#e8f1fb"/>
+    <path d="M56 42h174v20c-33 2-48 2-68 9-25 9-30 29-58 35-17 4-28 3-48 3z" fill="#4169e1" opacity=".9"/>
+    <path d="M56 59h174v17c-31 3-48 6-63 16-19 13-27 29-58 33-18 2-31-2-53-2z" fill="#10b8d0" opacity=".9"/>
+    <path d="M56 81h174v16c-26 5-37 12-49 22-16 16-25 30-52 33-26 3-47-7-73-8z" fill="#f3c84b" opacity=".92"/>
+    <path d="M56 111c37-1 52 10 70 17 23 10 45 9 61 3 18-7 27-18 43-21v59H56z" fill="#ef7250" opacity=".86"/>
+    <g fill="none" stroke="#fff" stroke-width="1.2" opacity=".85">
+      <path d="M57 48c43-3 52 1 73 13 26 15 34 25 99 18"/><path d="M57 70c30-2 43 3 62 16 22 15 43 22 110 13"/>
+      <path d="M57 94c31-2 46 8 62 20 20 15 46 27 110 21"/><path d="M57 126c28 1 43 10 62 16 28 10 66 9 110-2"/>
+    </g>
+    <path d="M147 78l20 19-17 22-21-17z" fill="#172b44" stroke="#fff" stroke-width="2"/>
+    <path d="M202 39v54" stroke="#fff" stroke-width="2"/><path d="M198 45l4-6 4 6" fill="none" stroke="#fff" stroke-width="2"/>
+  </g>
+  <rect x="56" y="32" width="174" height="137" rx="4" fill="none" stroke="#9db1c9"/>
+  <text x="61" y="164" fill="#24364c" font-family="Arial,sans-serif" font-size="6">Velocity magnitude · CFD result</text>
+</svg>

@@ -2,14 +2,15 @@
 theme: seriph
 class: hero-slide
 layout: default
-title: 自己紹介と競技プログラミング
-info: 自己紹介と、競技プログラミングから見るアルゴリズム・最適化の話
+title: AI時代における数理最適化エンジニアの役割
+info: 競技プログラミングと生成AIから考える、数理最適化エンジニアの役割
 transition: fade
 mdc: true
 ---
 
 <div class="hero-wrap">
-  <h1 class="hero-title">自己紹介と<br><span>競技プログラミング</span></h1>
+  <p class="eyebrow hero-kicker">競技プログラミングと生成AIから考える</p>
+  <h1 class="hero-title">AI時代における<br><span>数理最適化エンジニアの役割</span></h1>
   <div class="hero-orbit orbit-one"></div><div class="hero-orbit orbit-two"></div>
   <div class="hero-dot dot-one"></div><div class="hero-dot dot-two"></div>
 </div>
@@ -19,20 +20,31 @@ mdc: true
 -->
 
 ---
-class: profile-only-slide
+class: section-divider-slide
 title: 自己紹介
 ---
 
+<SectionDivider
+  number="00"
+  title="自己紹介"
+/>
+
+---
+class: profile-only-slide
+title: 自己紹介・経歴
+---
+
+<DeckHeader chapter="0 自己紹介" subtitle="経歴" title="田中翔一" class="profile-heading" />
+
 <div class="profile-intro">
   <div class="profile-history">
-    <h1>田中翔一</h1>
     <ol class="career-timeline" aria-label="経歴">
-      <li><time>1989</time><span>生まれ</span></li>
+      <li><time>1989年</time><span>長野生まれ、千葉育ち</span></li>
       <li><time>2008～2014年</time><span>筑波大学・筑波大学院</span></li>
-      <li><time>2014～2017年</time><span>東芝</span></li>
-      <li><time>2018～2020年</time><span>みずほ情報総研</span></li>
-      <li><time>2021～2023年</time><span>クロネコヤマト</span></li>
-      <li><time>2024年3月</time><span>アルゴリズムGr</span></li>
+      <li><time>2014～2017年</time><span>東芝 電力研究所</span></li>
+      <li><time>2018～2020年</time><span>みずほ情報総研 シンクタンク部門</span></li>
+      <li><time>2021～2023年</time><span>クロネコヤマト 数理最適化チーム</span></li>
+      <li><time>2024年3月</time><span>トヨタ自動車 アルゴリズムGr</span></li>
     </ol>
   </div>
   <img src="https://recruit.toyota/img/interview/main/134@2x.jpg" alt="プロフィール写真" />
@@ -40,156 +52,174 @@ title: 自己紹介
 
 ---
 class: interest-slide
-title: Interest Map
+title: 経験・趣味
 ---
 
-<InterestMap />
+<DeckHeader chapter="0 自己紹介" subtitle="経験・趣味" />
+<div class="interest-slide-body"><InterestMap /></div>
+
+---
+class: agenda-slide
+title: 目次
+---
+
+<DeckHeader chapter="目次" />
+<div class="talk-scope">
+  <section class="talk-scope-card talk-scope-agenda">
+    <h2>目次</h2>
+    <ol start="0">
+      <li>自己紹介</li>
+      <li>数理最適化とは</li>
+      <li>数理最適化（競技プログラミング）の問題紹介</li>
+      <li>AI時代における数理最適化エンジニアの役割</li>
+    </ol>
+  </section>
+  <div class="talk-scope-stack">
+    <section class="talk-scope-card talk-scope-included">
+      <h2>今日の目的</h2>
+      <ul>
+        <li>数理最適化と競技プログラミングのイメージを持ってもらう</li>
+        <li>AI時代における数理最適化エンジニアの役割を知ってもらう</li>
+      </ul>
+    </section>
+    <section class="talk-scope-card talk-scope-excluded">
+      <h2>今日話さないこと</h2>
+      <ul>
+        <li>個別のプロジェクトの紹介</li>
+        <li>技術の詳細</li>
+      </ul>
+    </section>
+  </div>
+</div>
+
+---
+class: section-divider-slide
+title: 数理最適化と競技プログラミング
+---
+
+<SectionDivider number="01" title="数理最適化とは" />
+
+---
+class: tech-slide
+title: 技術領域マップ
+---
+
+<DeckHeader chapter="1 数理最適化とは" subtitle="技術マップ" title="技術領域マップ" />
+<div class="tech-map-stage"><TechMap /></div>
+
+---
+class: role-question-slide
+title: 数理最適化の役割
+---
+
+<DeckHeader chapter="1 数理最適化とは" subtitle="数理最適化の役割" title="生成AI時代の素朴な疑問" />
+<div class="role-question"><p>数理最適化は、目的と制約を表し、条件を守る解を探す。</p><p>全ての問題、生成AIに任せられるのでは？</p></div>
 
 ---
 class: ai-optimization-slide
 title: ナンバーリンクを解く
 ---
 
-<div class="section-head compact">
-  <p class="eyebrow">生成AI vs 数理最適化 · NUMBERLINK</p>
-  <h1>ナンバーリンクを解く</h1>
-</div>
+<DeckHeader chapter="1 数理最適化とは" subtitle="AI vs 数理最適化" title="同じ盤面を、2つの方法で解く" />
 
 <NumberlinkChallenge />
 
 ---
-class: section-divider
+class: solver-summary-slide
+title: 制約を厳密に守り、最適な答えを出すには、数理最適化が適している
 ---
 
-<div class="chapter-number">02</div>
-<div class="chapter-content">
-  <h1>競技プログラミング</h1>
+<DeckHeader chapter="1 数理最適化とは" subtitle="ナンバーリンクの結論" title="制約を厳密に守り、最適な答えを出すには、数理最適化が適している" />
+<div class="solver-summary">
+  <section class="solver-summary-card"><h2>生成AIに直接解かせる</h2><p>答えをすぐ提案できる。条件の見落としや、最適性を確認できないことがある。</p></section>
+  <section class="solver-summary-card"><h2>数理最適化で解く</h2><p>条件を制約として明示し、条件を満たす解を探す。最適性を証明できれば、最善の解だと確認できる。</p></section>
 </div>
+
+---
+class: approaches-slide
+title: AIが数理最適化領域を解くアプローチは二つある
+---
+
+<DeckHeader chapter="1 数理最適化とは" subtitle="AIの二つのアプローチ" title="AIが数理最適化領域を解くアプローチは二つある" />
+<div class="approach-cards">
+  <section class="approach-card"><h2>1. 問題から答えを直接導く</h2><p>盤面や条件を読み、生成AIがそのまま答えを作る。</p><div class="approach-flow"><span>問題</span><b>→</b><span>生成AI</span><b>→</b><span>答え</span></div></section>
+  <section class="approach-card"><h2>2. 最適化プログラムを書く</h2><p>生成AIがモデルやコードを作り、ソルバーが条件を守る解を探す。</p><div class="approach-flow"><span>問題</span><b>→</b><span>AIがコードを書く</span><b>→</b><span>ソルバー</span><b>→</b><span>答え</span></div></section>
+</div>
+
+---
+class: section-divider-slide
+title: 数理最適化（競技プログラミング）の問題紹介
+---
+
+<SectionDivider number="02" title="数理最適化（競技プログラミング）の問題紹介" />
 
 ---
 class: problem-slide
+title: アリが全員落ちるのは何秒後？
 ---
 
-<script setup>
-import AntsDiagram from './components/AntsDiagram.vue'
-</script>
-
-<div class="section-head compact ants-problem-head">
-  <p class="eyebrow">PROBLEM 01 · ANTS</p>
-  <h1>アリが全員落ちるのは、何秒後？</h1>
-  <p>長さ10 cmの棒の上を5匹のアリが速さ1 cm/秒で歩きます。ぶつかると向きを変え、端から落ちるまで歩き続けます。<br>すべてのアリが落ちるのは何秒後でしょうか？ ※アリの大きさは無視します。</p>
-</div>
+<DeckHeader chapter="2 数理最適化（競技プログラミング）の問題紹介" subtitle="アリの問題 · 考え方" title="アリが全員落ちるのは、何秒後？" description="1 cm/秒で進み、衝突で反転。端から落ちます（大きさは無視）。" class="ants-problem-head" />
 
 <AntsDiagram />
 
 ---
 class: ants-explanation-slide
+title: 衝突は素通りと考える
 ---
 
-<script setup>
-import AntsIdeaDiagram from './components/AntsIdeaDiagram.vue'
-</script>
-
-<div class="section-head compact ants-explanation-head">
-  <p class="eyebrow">PROBLEM 01 · ANSWER</p>
-  <h1>衝突は素通りと考えてOK</h1>
-</div>
+<DeckHeader chapter="2 数理最適化（競技プログラミング）の問題紹介" subtitle="アリの問題 · 解き方" title="衝突は素通りと考えてOK" class="ants-explanation-head" />
 
 <AntsIdeaDiagram />
 
 ---
-class: demo-intro
----
-
-<div class="demo-intro-copy">
-  <p class="eyebrow">PROBLEM 02 · INTERACTIVE OPTIMIZATION</p>
-  <h1>駐車枠を、<br><span>できるだけ多く。</span></h1>
-  <p>障害物のあるマス目に、横か縦の2マス枠を敷き詰める。</p>
-  <div class="demo-rules">
-    <div><span>01</span><b>マスをクリック</b><small>障害物を置く・消す</small></div>
-    <div><span>02</span><b>最適化を実行</b><small>置ける枠を計算</small></div>
-    <div><span>03</span><b>結果を観察</b><small>どこまで埋まる？</small></div>
-  </div>
-</div>
-<div class="demo-preview" aria-hidden="true">
-  <div class="preview-grid">
-    <i></i><i></i><i class="p-tile"></i><i class="p-tile"></i><i></i><i></i>
-    <i></i><i class="p-tile"></i><i class="p-tile"></i><i></i><i class="p-wall"></i><i></i>
-    <i class="p-tile"></i><i class="p-tile"></i><i></i><i></i><i></i><i></i>
-    <i></i><i></i><i class="p-wall"></i><i></i><i class="p-tile"></i><i class="p-tile"></i>
-    <i></i><i></i><i></i><i></i><i class="p-tile"></i><i class="p-tile"></i>
-    <i class="p-wall"></i><i></i><i></i><i></i><i></i><i></i>
-  </div>
-</div>
-
----
 class: parking-slide
+title: 駐車枠の配置問題
 ---
 
 <div class="parking-head">
-  <div><p class="eyebrow">TRY IT</p><h1>障害物を置いて、解いてみる。</h1></div>
+  <DeckHeader chapter="2 数理最適化（競技プログラミング）の問題紹介" subtitle="駐車配置" title="駐車枠の配置問題" />
   <div class="parking-legend"><span class="legend-obstacle"></span>障害物 <svg class="legend-car" viewBox="0 0 24 14" aria-hidden="true"><rect x="2" y="3" width="20" height="8" rx="4" fill="#2f6fed" /><rect x="9" y="4" width="6" height="6" rx="2" fill="#b8d9ff" /></svg>駐車した車</div>
 </div>
 <ParkingDemo />
 
 ---
 class: explain-slide
+title: 2色に塗り分け、最大マッチング問題として解く
 ---
 
-<div class="section-head compact">
-  <p class="eyebrow">HOW IT WORKS</p>
-  <h1>2色に塗り分け、マッチング問題として解く。</h1>
-</div>
+<DeckHeader chapter="2 数理最適化（競技プログラミング）の問題紹介" subtitle="駐車配置 · 解法" title="2色に塗り分けて解く" />
 
 <MatchingDiagram />
 
 ---
 class: ahc-slide
+title: 変化する配送計画
 ---
 
-<div class="section-head compact">
-  <p class="eyebrow">PROBLEM 03 · LONG-TERM AHC</p>
-  <h1>注文が増えるたび、配送計画を組み直す。</h1>
-  <p>複数車両・時間帯・積載量・勤務時間。道路と注文も途中で変わる。（架空の設定）</p>
-</div>
+<DeckHeader chapter="2 数理最適化（競技プログラミング）の問題紹介" subtitle="長期AHC · 模式例" title="変化する注文に、計画を組み直す。" />
 
 <DispatchChallenge />
 
----
-class: ahc-slide
----
-
-<div class="section-head compact">
-  <p class="eyebrow">PROBLEM 03 · SEARCH AND TRADE-OFFS</p>
-  <h1>短いルートが、よい計画とは限らない。</h1>
-  <p>遅配や残業も評価しながら、限られた時間で候補を改善する。（数値は模式例）</p>
-</div>
-
-<DispatchStrategy />
+<!--
+架空の配送設定。複数の条件を守りつつ、限られた時間で計画を改善する。
+距離38kmでも遅配3件の候補と、距離46kmで遅配0件の候補では、短さだけで採用を決められない。訪問順・担当を変え、制約を検査し、評価して更新する。
+-->
 
 ---
-class: tech-slide
+class: section-divider-slide
+title: AI時代における数理最適化エンジニアの役割
 ---
 
-<TechMap />
-
----
-class: section-divider
----
-
-<div class="chapter-number">03</div>
-<div class="chapter-content">
-  <h1>AI時代の<br><span>数理最適化エンジニア。</span></h1>
-</div>
+<SectionDivider number="03" title="AI時代における数理最適化エンジニアの役割">
+  <template #title>AI時代における<br />数理最適化エンジニアの役割</template>
+</SectionDivider>
 
 ---
 class: ai-progress-slide
+title: 最適化問題における生成AIの実力
 ---
 
-<div class="section-head compact">
-  <p class="eyebrow">AI CAPABILITY · ALE-BENCH</p>
-  <h1>最適化領域における生成AIの実力</h1>
-</div>
+<DeckHeader chapter="3 AI時代における数理最適化エンジニアの役割" subtitle="生成AIの能力 · ALE-Bench" title="最適化問題における生成AIの実力" />
 
 <AiProgress />
 
@@ -198,11 +228,7 @@ class: value-slide
 title: AIで解くコストが下がる
 ---
 
-<div class="section-head compact">
-  <p class="eyebrow">AI時代の価値 · 全体像</p>
-  <h1>AIで「解くコスト」が下がる。</h1>
-  <p>専門家は、何を解き、どう評価し、どこを変えるかを設計する。</p>
-</div>
+<DeckHeader chapter="3 AI時代における数理最適化エンジニアの役割" subtitle="価値の全体像" title="AIで「解くコスト」が下がる。" />
 
 <OptimizationValue view="overview" />
 
@@ -218,11 +244,7 @@ class: value-slide
 title: 1 解くべき問題を設計する
 ---
 
-<div class="section-head compact">
-  <p class="eyebrow">1 / 5 · 問題を設計する</p>
-  <h1>何を最適化するか、決める。</h1>
-  <p>変数・目標・制約・粒度を選ぶと、解く問題が変わる。</p>
-</div>
+<DeckHeader chapter="3 AI時代における数理最適化エンジニアの役割" subtitle="1 / 5 · 問題を設計する" title="何を最適化するかを決める。" />
 
 <OptimizationValue view="problem" />
 
@@ -239,11 +261,7 @@ class: value-slide
 title: 2 AIが改善できる評価系を設計する
 ---
 
-<div class="section-head compact">
-  <p class="eyebrow">2 / 5 · 評価を設計する</p>
-  <h1>「良くなった」を、自動で確かめる。</h1>
-  <p>評価指標とテスト問題を用意して、AIの変更を採用できるか判断する。</p>
-</div>
+<DeckHeader chapter="3 AI時代における数理最適化エンジニアの役割" subtitle="2 / 5 · 評価系を設計する" title="「良くなった」を自動で確かめる。" />
 
 <OptimizationValue view="evaluation" />
 
@@ -260,11 +278,7 @@ class: value-slide
 title: 3 本当のボトルネックを診断する
 ---
 
-<div class="section-head compact">
-  <p class="eyebrow">3 / 5 · 改善先を見極める</p>
-  <h1>どこを変えると、成果が出るか。</h1>
-  <p>計算の速さだけでなく、計画が現場で使われるまでを見る。</p>
-</div>
+<DeckHeader chapter="3 AI時代における数理最適化エンジニアの役割" subtitle="3 / 5 · ボトルネックを診断する" title="どこを変えると成果が出るか。" />
 
 <OptimizationValue view="diagnosis" />
 
@@ -280,11 +294,7 @@ class: value-slide
 title: 4 現実側を変えて問題を簡単にする
 ---
 
-<div class="section-head compact">
-  <p class="eyebrow">4 / 5 · 現実のルールを変える</p>
-  <h1>問題そのものを、解きやすくする。</h1>
-  <p>業務に必要な自由度と、計算を難しくしている自由度を見分ける。</p>
-</div>
+<DeckHeader chapter="3 AI時代における数理最適化エンジニアの役割" subtitle="4 / 5 · 現実のルールを見直す" title="業務ルールを変え、解きやすくする。" />
 
 <OptimizationValue view="reshape" />
 
@@ -300,11 +310,7 @@ class: value-slide
 title: 5 数理最適化の専門性でAIを検証・誘導する
 ---
 
-<div class="section-head compact">
-  <p class="eyebrow">5 / 5 · 専門性で検証・誘導する</p>
-  <h1>AIの提案を、数学で確かめる。</h1>
-  <p>コードが動いた先で、制約・下界・探索方法が妥当かを判断する。</p>
-</div>
+<DeckHeader chapter="3 AI時代における数理最適化エンジニアの役割" subtitle="5 / 5 · 専門性で検証・誘導する" title="AIの提案を数学で確かめる。" />
 
 <OptimizationValue view="expertise" />
 
@@ -318,33 +324,13 @@ LP緩和で0≤y≤1とすると、x=100に対してM=1000000ではy≥0.0001、
 -->
 
 ---
-class: value-slide
-title: 5つの能力を数理最適化の専門性が支える
----
-
-<div class="section-head compact">
-  <p class="eyebrow">AI時代の価値 · 5つの能力の関係</p>
-  <h1>専門知識で、AIの改善を導く。</h1>
-  <p>問題と評価を設計し、結果を診断して、次に変える場所を決める。</p>
-</div>
-
-<OptimizationValue view="relationship" />
-
-<!--
-5つの能力は独立した作業ではない。1で何を解くか決め、2で良さを定義し、AIが高速に実装・探索する。3で結果とボトルネックを診断し、アルゴリズムを改善するか、4で現実のルールを変えるかを選ぶ。
-変更した問題・ルールに合わせて、モデルと評価を見直し、次の改善を繰り返す。
-5の数理最適化の専門性は全体を支える。変数・制約・粒度、実行可能性・最適性ギャップ、問題規模と緩和、分解法と探索方法を判断する知識が、各段階の意思決定に効く。
--->
-
----
 class: closing-slide
-title: AI時代の数理最適化エンジニアの価値
+title: AI時代における数理最適化エンジニアの役割
 ---
 
-<p class="eyebrow">AI時代の数理最適化エンジニア</p>
-<h1>「解くコスト」が下がるほど、<br><span>何を解くかを決める価値が上がる。</span></h1>
+<p class="eyebrow closing-meta"><span>まとめ</span><span class="deck-header-separator">·</span><span>AI時代における数理最適化エンジニアの役割</span></p>
+<h1>解くコストが下がるほど、<br><span>設計と判断の価値が上がる。</span></h1>
 <div class="closing-points"><span>何を解くか</span><i></i><span>何を良しとするか</span><i></i><span>どこを変えるか</span></div>
-<p class="closing-message">AIを使って、現実の意思決定を最適化する仕組みを設計する。</p>
 <p class="closing-thanks">ご清聴ありがとうございました</p>
 
 <!--

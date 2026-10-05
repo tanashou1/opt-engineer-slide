@@ -220,24 +220,24 @@ onBeforeUnmount(() => cancelAnimationFrame(frame))
 .measure { position: absolute; top: 6px; height: 11px; border-left: 1px solid #a8bfd9; }
 .left-end { left: 0; }
 .right-end { right: 0; }
-.length-marker b { position: absolute; top: 17px; left: 50%; transform: translateX(-50%); padding: 0 9px; background: #f8fbff; color: #6f86a2; font-size: 11px; font-weight: 600; white-space: nowrap; }
-.elapsed-readout { position: absolute; top: 59px; right: 18px; z-index: 2; display: flex; align-items: baseline; gap: 8px; padding: 4px 10px; border: 1px solid #d5e3f2; border-radius: 9px; color: #607995; background: #ffffffed; font-size: 10px; box-shadow: 0 3px 10px #54759a12; }
-.elapsed-readout strong { color: #245b9e; font: 700 14px/1 Arial,sans-serif; font-variant-numeric: tabular-nums; }
+.length-marker b { position: absolute; top: 17px; left: 50%; transform: translateX(-50%); padding: 0 9px; background: #f8fbff; color: #6f86a2; font-size: 15px; font-weight: 600; white-space: nowrap; }
+.elapsed-readout { position: absolute; top: 59px; right: 18px; z-index: 2; display: flex; align-items: baseline; gap: 8px; padding: 4px 10px; border: 1px solid #d5e3f2; border-radius: 9px; color: #607995; background: #ffffffed; font-size: 14px; box-shadow: 0 3px 10px #54759a12; }
+.elapsed-readout strong { color: #245b9e; font: 700 20px/1 Arial,sans-serif; font-variant-numeric: tabular-nums; }
 .elapsed-readout small { margin-left: 2px; font-size: 9px; }
 .rod { position: absolute; top: 170px; left: 6%; width: 88%; height: 20px; border: 1px solid #87a7cd; border-radius: 13px; background: linear-gradient(180deg, #deecfb, #c4dcf5); box-shadow: 0 8px 18px #b9d1eb38; }
 .ruler { position: absolute; top: 191px; left: 6%; width: 88%; height: 38px; }
 .end-tick { position: absolute; top: 0; height: 9px; border-left: 1px solid #7494b9; }
 .left-tick { left: 0; }
 .right-tick { right: 0; }
-.end-number { position: absolute; top: 11px; transform: translateX(-50%); color: #7389a4; font: 600 11px Arial,sans-serif; }
+.end-number { position: absolute; top: 11px; transform: translateX(-50%); color: #7389a4; font: 600 15px Arial,sans-serif; }
 .left-number { left: 0; }
 .right-number { left: 100%; }
 .position-tick { position: absolute; top: 0; height: 5px; border-left: 1px solid #91a9c5; }
-.position-number { position: absolute; top: 11px; transform: translateX(-50%); color: #506f94; font: 700 10px Arial,sans-serif; }
-.ruler-caption { position: absolute; top: 25px; left: 50%; transform: translateX(-50%); color: #91a3b8; font-size: 8px; white-space: nowrap; }
+.position-number { position: absolute; top: 11px; transform: translateX(-50%); color: #506f94; font: 700 15px Arial,sans-serif; }
+.ruler-caption { position: absolute; top: 31px; left: 50%; transform: translateX(-50%); color: #91a3b8; font-size: 13px; white-space: nowrap; }
 .runner { position: absolute; top: 112px; z-index: 2; width: 60px; height: 68px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; transition: top .25s ease, opacity .22s ease; }
 .runner.fallen { top: 168px; opacity: 0; }
-.runner-id { display: grid; place-items: center; width: 14px; height: 14px; border-radius: 50%; color: white; font: 700 8px Arial,sans-serif; }
+.runner-id { display: grid; place-items: center; width: 14px; height: 14px; border-radius: 50%; color: white; font: 700 10px Arial,sans-serif; }
 .direction-arrow { height: 18px; color: #4c86cd; font: 700 16px/18px Arial,sans-serif; }
 .blue .runner-id, .ant-legend .blue { background: #347ac4; }
 .coral .runner-id, .ant-legend .coral { background: #d96d62; }
@@ -261,10 +261,10 @@ onBeforeUnmount(() => cancelAnimationFrame(frame))
 .impact { position: absolute; top: 141px; z-index: 3; transform: translateX(-50%); color: #f3a449; font-size: 29px; line-height: 1; animation: pop .42s ease-out forwards; pointer-events: none; }
 .control-bar { display: flex; align-items: center; justify-content: space-between; }
 .ant-legend, .transport-controls { display: flex; align-items: center; gap: 6px; }
-.ant-legend { color: #7c90a9; font-size: 10px; }
-.ant-legend b { display: grid; place-items: center; width: 17px; height: 17px; border-radius: 50%; color: #fff; font: 700 8px Arial,sans-serif; }
+.ant-legend { color: #7c90a9; font-size: 14px; }
+.ant-legend b { display: grid; place-items: center; width: 17px; height: 17px; border-radius: 50%; color: #fff; font: 700 10px Arial,sans-serif; }
 .transport-controls { gap: 8px; }
-.transport-controls button { min-width: 82px; height: 32px; padding: 0 12px; border: 1px solid #cbdcf0; border-radius: 8px; color: #315c91; background: #fff; font: 700 11px 'Noto Sans JP', sans-serif; cursor: pointer; }
+.transport-controls button { min-width: 82px; height: 32px; padding: 0 12px; border: 1px solid #cbdcf0; border-radius: 8px; color: #315c91; background: #fff; font: 700 14px 'Noto Sans JP', sans-serif; cursor: pointer; }
 .transport-controls .play-button { color: white; border-color: #2f6fed; background: #2f6fed; }
 .transport-controls button:disabled { opacity: .45; cursor: default; }
 .transport-controls button:focus-visible { outline: 3px solid #8cb8f1; outline-offset: 2px; }

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 170 205" role="img" aria-labelledby="title desc">
+  <title id="title">「まだやるかい」漫画風イラスト</title>
+  <desc id="desc">対峙する二人の格闘家と「まだやるかい」の吹き出しを描いたオリジナル画</desc>
+  <rect width="170" height="205" fill="#f8f7f2"/>
+  <path d="M0 0h170v205H0z" fill="none" stroke="#171717" stroke-width="5"/>
+  <path d="M0 116l58-50M0 138l75-66M5 164l83-82M125 0L39 91M157 1L58 104M170 27L79 118" stroke="#555" stroke-width="1" opacity=".45"/>
+  <path d="M18 22Q18 8 34 8h116q12 0 12 14v36q0 12-12 12H81l-20 16 5-16H34q-16 0-16-12z" fill="#fff" stroke="#111" stroke-width="3"/>
+  <text x="91" y="43" text-anchor="middle" fill="#111" font-family="sans-serif" font-size="20" font-weight="900">まだやるかい</text>
+  <path d="M13 178l12-30 10-13 9 2 6 14-4 23 10 25H8zm29-45l-2-18 5-11 10-2 9 9-2 17-7 9z" fill="#171717"/>
+  <path d="M81 185l6-31-5-21 8-18 17-11 20 4 11 17-7 18 8 23 18 21z" fill="#222"/>
+  <path d="M89 111l4-22 11-17 16 2 13 14-2 21-13 13-18-1z" fill="#dedbd2" stroke="#111" stroke-width="3"/>
+  <path d="M93 93l8-9 10-2 10 6 8 9-7 5-6-6-12 1-5 8-8-2zm13 10l5 2 5-3m-15 18l13 2 10-5" fill="none" stroke="#111" stroke-width="3" stroke-linecap="round"/>
+  <path d="M70 156l-18-16-16 4m76-20l-11 24-19 16m50-39l17-4 12 9" fill="none" stroke="#111" stroke-width="7" stroke-linecap="round"/>
+</svg>

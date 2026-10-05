@@ -40,7 +40,7 @@
   <title id="title">技術領域マップ</title>
   <desc id="desc">
     計算機科学、数理最適化、ソフトウェアエンジニアリング、
-    競技プログラミング、データサイエンスの関係を表す技術領域マップ。
+    競技プログラミング、データサイエンスなどの技術分野の関係を表す図。
   </desc>
 
   <style>
@@ -124,7 +124,6 @@
   </style>
 
   <rect class="bg" x="0" y="0" width="1400" height="920"/>
-  <text class="title" x="55" y="55">技術領域マップ</text>
 
   <!-- Main regions -->
   <rect class="area cs"

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" role="img" aria-labelledby="title desc">
+  <title id="title">Rust programming language</title>
+  <desc id="desc">Rustを表す赤橙色の歯車とR</desc>
+  <rect width="160" height="120" rx="13" fill="#fff4ed"/>
+  <g transform="translate(80 52)">
+    <path d="M-11-49h22l3 11 8 3 9-7 16 16-7 9 3 8 11 3v22l-11 3-3 8 7 9-16 16-9-7-8 3-3 11h-22l-3-11-8-3-9 7-16-16 7-9-3-8-11-3v-22l11-3 3-8-7-9 16-16 9 7 8-3z" fill="#d74a22"/>
+    <circle r="34" fill="#fff"/><circle r="27" fill="#d74a22"/><circle r="18" fill="#fff"/>
+    <path d="M-7-11h18c9 0 14 5 14 12 0 6-3 9-8 11l8 12H11L5 14H1v10h-13zm12 11H1v5h4c3 0 4-1 4-3s-1-2-4-2" fill="#d74a22"/>
+  </g>
+  <text x="80" y="108" text-anchor="middle" fill="#87341e" font-family="Arial,sans-serif" font-size="17" font-weight="700">RUST</text>
+</svg>

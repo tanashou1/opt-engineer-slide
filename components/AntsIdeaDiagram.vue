@@ -12,8 +12,8 @@ import AntsDiagram from './AntsDiagram.vue'
 </template>
 
 <style scoped>
-.ants-idea { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: 348px auto; justify-items: stretch; gap: 10px; width: 100%; height: 410px; color: #17375f; }
-.answer-formula { display: flex; justify-self: center; align-items: baseline; gap: 9px; padding: 8px 24px; border: 1px solid #cbdff7; border-radius: 13px; background: #eef5ff; box-shadow: 0 8px 20px #315b8b0d; }
+.ants-idea { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: 348px auto; justify-items: stretch; gap: 8px; width: 100%; height: 398px; color: #17375f; }
+.answer-formula { display: flex; justify-self: center; align-items: baseline; gap: 9px; padding: 4px 24px; border: 1px solid #cbdff7; border-radius: 13px; background: #eef5ff; box-shadow: 0 8px 20px #315b8b0d; }
 .answer-formula span { color: #6282aa; font: italic 700 19px Georgia,serif; }
-.answer-formula b { color: #245b9e; font: 700 23px Arial,sans-serif; letter-spacing: .01em; white-space: nowrap; }
+.answer-formula b { color: #245b9e; font: 700 26px Arial,sans-serif; letter-spacing: .01em; white-space: nowrap; }
 </style>

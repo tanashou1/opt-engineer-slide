@@ -3,6 +3,8 @@ import { ref } from 'vue'
 import geminiAnswerImage from '../assets/gemini-numberlink-answer.png'
 
 const answerMode = ref(null)
+const formulationStep = ref(0)
+const formulationSteps = ['マスの割当', '線の接続', '経路の連結']
 
 const rows = [
   '1.4....',
@@ -171,7 +173,6 @@ const examplePaths = makePaths(exampleRoutes, 4, 132, 6, 3)
   <div class="numberlink-layout" role="group" aria-label="7行7列、5組の数字をつなぐナンバーリンク問題">
     <div class="numberlink-board-panel">
       <div class="board-caption">
-        <b>{{ answerMode === 'gemini' ? 'Geminiの回答' : answerMode === 'optimization' ? '求解結果' : '問題の盤面' }}</b>
         <div class="answer-buttons">
           <button class="answer-button gemini-button" type="button" :aria-pressed="answerMode === 'gemini'" @click.stop="toggleAnswer('gemini')">Geminiの回答</button>
           <button class="answer-button optimization-button" type="button" :aria-pressed="answerMode === 'optimization'" @click.stop="toggleAnswer('optimization')">数理最適化で求解</button>
@@ -190,8 +191,6 @@ const examplePaths = makePaths(exampleRoutes, 4, 132, 6, 3)
           </svg>
         </div>
       </div>
-      <div class="board-stats"><b>7 × 7</b><span>49マス</span><i></i><b>5組</b><span>数字ペア</span></div>
-      <p v-if="answerMode === 'gemini'" class="gemini-coordinate-note">Geminiの回答図にある線を、形のまま盤面に重ねています。</p>
     </div>
 
     <figure v-if="answerMode === 'gemini'" class="gemini-capture">
@@ -201,17 +200,18 @@ const examplePaths = makePaths(exampleRoutes, 4, 132, 6, 3)
 
     <section v-else-if="answerMode === 'optimization'" class="optimization-formulation" aria-label="ナンバーリンクの整数計画定式化">
       <h2>ナンバーリンクの定式化</h2>
+      <div class="formulation-tabs" aria-label="表示する制約">
+        <button v-for="(label, index) in formulationSteps" :key="label" type="button" :aria-pressed="formulationStep === index" @click="formulationStep = index">{{ label }}</button>
+      </div>
 
-      <div class="formulation-section">
-        <h3>変数</h3>
-        <p><i>G</i> = (<i>V</i>, <i>E</i>)、数字ペア <i>k</i> の端点 <i>s</i><sub>k</sub>, <i>t</i><sub>k</sub>。</p>
-        <p><i>y</i><sub>v,k</sub>, <i>x</i><sub>e,k</sub> ∈ {0,1} は割当・使用辺、<i>f</i><sub>uv,k</sub> ≥ 0 は隣接マス u→v の有向フロー。</p>
+      <div class="formulation-variables">
+        <p><i>y</i>：マス割当、<i>x</i>：辺の使用（0/1）。<br>数字ペア <i>k</i> の端点：<i>s</i><sub>k</sub>, <i>t</i><sub>k</sub>。</p>
+        <p v-if="formulationStep === 2"><i>f</i>：隣接マスへ流す量（0以上）。</p>
       </div>
 
       <div class="formulation-section">
-        <h3>制約</h3>
         <ol class="formulation-constraints">
-          <li>
+          <li v-show="formulationStep === 0">
             <b>全マスをちょうど1組に割り当てる</b>
             <math class="math-formula" display="block">
               <mrow><msub><mo>∑</mo><mi>k</mi></msub><msub><mi>y</mi><mrow><mi>v</mi><mo>,</mo><mi>k</mi></mrow></msub><mo>=</mo><mn>1</mn><mspace width="1em"/><mo stretchy="false">(</mo><mo>∀</mo><mi>v</mi><mo stretchy="false">)</mo></mrow>
@@ -220,8 +220,8 @@ const examplePaths = makePaths(exampleRoutes, 4, 132, 6, 3)
               <mrow><msub><mi>y</mi><mrow><msub><mi>s</mi><mi>k</mi></msub><mo>,</mo><mi>k</mi></mrow></msub><mo>=</mo><msub><mi>y</mi><mrow><msub><mi>t</mi><mi>k</mi></msub><mo>,</mo><mi>k</mi></mrow></msub><mo>=</mo><mn>1</mn><mspace width=".5em"/><mtext>(端点)</mtext></mrow>
             </math>
           </li>
-          <li>
-            <b>辺は同じペアのマスだけを結び、端点と中間マスの次数を守る</b>
+          <li v-show="formulationStep === 1">
+            <b>同じペアのマスを結ぶ。端点は1本、中間は2本</b>
             <math class="math-formula" display="block">
               <mrow><msub><mi>x</mi><mrow><mo stretchy="false">{</mo><mi>u</mi><mo>,</mo><mi>v</mi><mo stretchy="false">}</mo><mo>,</mo><mi>k</mi></mrow></msub><mo>≤</mo><msub><mi>y</mi><mrow><mi>u</mi><mo>,</mo><mi>k</mi></mrow></msub><mo>,</mo><mspace width=".7em"/><msub><mi>x</mi><mrow><mo stretchy="false">{</mo><mi>u</mi><mo>,</mo><mi>v</mi><mo stretchy="false">}</mo><mo>,</mo><mi>k</mi></mrow></msub><mo>≤</mo><msub><mi>y</mi><mrow><mi>v</mi><mo>,</mo><mi>k</mi></mrow></msub></mrow>
             </math>
@@ -232,8 +232,8 @@ const examplePaths = makePaths(exampleRoutes, 4, 132, 6, 3)
               <mrow><msub><mo>∑</mo><mrow><mi>e</mi><mo>∈</mo><mi>δ</mi><mo stretchy="false">(</mo><mi>v</mi><mo stretchy="false">)</mo></mrow></msub><msub><mi>x</mi><mrow><mi>e</mi><mo>,</mo><mi>k</mi></mrow></msub><mo>=</mo><mn>2</mn><msub><mi>y</mi><mrow><mi>v</mi><mo>,</mo><mi>k</mi></mrow></msub><mspace width=".5em"/><mtext>(それ以外)</mtext></mrow>
             </math>
           </li>
-          <li>
-            <b>フローで端点から全マスへの連結を保証</b>
+          <li v-show="formulationStep === 2">
+            <b>始点から全ての割当マスに流せることを保証</b>
             <small><i>s</i><sub>k</sub>を供給源にし、<i>s</i><sub>k</sub>以外の割当マスは各1単位を消費する。</small>
             <math class="math-formula" display="block">
               <mrow><msub><mo>∑</mo><mrow><mi>v</mi><mo>∈</mo><mi>N</mi><mo stretchy="false">(</mo><msub><mi>s</mi><mi>k</mi></msub><mo stretchy="false">)</mo></mrow></msub><msub><mi>f</mi><mrow><msub><mi>s</mi><mi>k</mi></msub><mi>v</mi><mo>,</mo><mi>k</mi></mrow></msub><mo>−</mo><msub><mo>∑</mo><mrow><mi>u</mi><mo>∈</mo><mi>N</mi><mo stretchy="false">(</mo><msub><mi>s</mi><mi>k</mi></msub><mo stretchy="false">)</mo></mrow></msub><msub><mi>f</mi><mrow><mi>u</mi><msub><mi>s</mi><mi>k</mi></msub><mo>,</mo><mi>k</mi></mrow></msub><mo>=</mo><msub><mo>∑</mo><mrow><mi>v</mi><mo>≠</mo><msub><mi>s</mi><mi>k</mi></msub></mrow></msub><msub><mi>y</mi><mrow><mi>v</mi><mo>,</mo><mi>k</mi></mrow></msub></mrow>
@@ -244,12 +244,12 @@ const examplePaths = makePaths(exampleRoutes, 4, 132, 6, 3)
             <math class="math-formula" display="block">
               <mrow><mn>0</mn><mo>≤</mo><msub><mi>f</mi><mrow><mi>u</mi><mi>v</mi><mo>,</mo><mi>k</mi></mrow></msub><mo>≤</mo><mn>48</mn><msub><mi>x</mi><mrow><mo stretchy="false">{</mo><mi>u</mi><mo>,</mo><mi>v</mi><mo stretchy="false">}</mo><mo>,</mo><mi>k</mi></mrow></msub></mrow>
             </math>
-            <small>選んだ辺だけに流せるため、始点から切れたマス群は需要を満たせない。48は始点以外の最大マス数。</small>
+            <small>48は始点以外の最大マス数。分断したマスへは流せない。</small>
           </li>
         </ol>
       </div>
 
-      <p class="formulation-footer">49マス全てを使い、5組それぞれの端点を結ぶ。</p>
+      <p class="formulation-footer">3種類の制約を全て満たす経路を求める。</p>
     </section>
 
     <div v-else class="numberlink-explanation">
@@ -258,8 +258,8 @@ const examplePaths = makePaths(exampleRoutes, 4, 132, 6, 3)
           <h2>ルール</h2>
           <div class="numberlink-rules">
             <div><b>01</b><span>同じ数字を1本の経路で結ぶ</span></div>
-            <div><b>02</b><span>上下左右のみ。交差・分岐は不可</span></div>
-            <div><b>03</b><span>全49マスをちょうど1回使う</span></div>
+            <div><b>02</b><span>上下左右に進む。交差・分岐は不可</span></div>
+            <div><b>03</b><span>全マスをちょうど1回使う</span></div>
           </div>
         </section>
 
@@ -276,77 +276,56 @@ const examplePaths = makePaths(exampleRoutes, 4, 132, 6, 3)
         </section>
       </div>
 
-      <div class="numberlink-methods">
-        <article class="direct-method">
-          <header><span class="method-dot"></span><b>生成AIの直接回答</b></header>
-          <p>線の候補は描けても、全49マス・5組を満たす保証はない。</p>
-        </article>
-        <article class="solver-method">
-          <header><span class="method-dot"></span><b>数理最適化で解く</b></header>
-          <p>セルと辺を変数にし、接続・非交差・全マス使用を制約化。</p>
-        </article>
-      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.numberlink-layout { display: grid; grid-template-columns: minmax(285px, .86fr) minmax(0, 1.14fr); align-items: center; gap: 24px; color: #24466e; }
-.numberlink-board-panel { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-.board-caption { display: flex; width: min(100%, 320px); align-items: center; justify-content: space-between; gap: 8px; }
-.board-caption b { color: #365981; font-size: 11px; }
-.answer-buttons { display: flex; align-items: center; gap: 5px; }
-.answer-button { padding: 6px 9px; border: 1px solid #c7d7eb; border-radius: 6px; color: #466487; background: #fff; font: 700 9px 'Noto Sans JP', sans-serif; cursor: pointer; white-space: nowrap; }
-.answer-button:hover { background: #edf4ff; }.answer-button[aria-pressed="true"] { color: #fff; }
-.gemini-button[aria-pressed="true"] { border-color: #d86c57; background: #d86c57; }.optimization-button[aria-pressed="true"] { border-color: #2f6fed; background: #2f6fed; }
+.numberlink-layout { display: grid; grid-template-columns: 320px minmax(0, 1fr); align-items: center; gap: 32px; color: #24466e; }
+.numberlink-board-panel { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.board-caption { display: flex; justify-content: center; width: 100%; }
+.answer-buttons { display: flex; align-items: center; gap: 8px; }
+.answer-button { min-height: 36px; padding: 7px 12px; border: 1px solid #c7d7eb; border-radius: 7px; color: #466487; background: #fff; font: 700 13px 'Noto Sans JP', sans-serif; cursor: pointer; white-space: nowrap; }
+.answer-button:hover { background: #edf4ff; }
+.answer-button[aria-pressed="true"] { color: #fff; }
+.gemini-button[aria-pressed="true"] { border-color: #d86c57; background: #d86c57; }
+.optimization-button[aria-pressed="true"] { border-color: #2f6fed; background: #2f6fed; }
 .answer-button:focus-visible { outline: 2px solid #8cb8f1; outline-offset: 2px; }
-.numberlink-stage { display: grid; box-sizing: border-box; width: min(100%, 300px); aspect-ratio: 1; place-items: center; }
+.numberlink-stage { display: grid; box-sizing: border-box; width: 300px; aspect-ratio: 1; place-items: center; }
 .numberlink-grid { position: relative; box-sizing: border-box; display: grid; width: 100%; aspect-ratio: 1; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-template-rows: repeat(7, minmax(0, 1fr)); gap: 4px; padding: 8px; border-radius: 9px; background: #dce7f7; box-shadow: 5px 6px 0 #c3d4eb; }
 .path-overlay { position: absolute; z-index: 2; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 .path-line { fill: none; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; opacity: .92; }
-.gemini-path-overlay { z-index: 2; }
 .gemini-answer-line { stroke: #34465f; stroke-width: 4.5; stroke-linecap: round; stroke-linejoin: round; }
 .route-blue { stroke: #2f6fed; }.route-orange { stroke: #e99835; }.route-green { stroke: #249d7d; }.route-purple { stroke: #8867c7; }.route-coral { stroke: #dd665d; }
 .numberlink-cell { display: grid; place-items: center; border: 1px solid #d3dfef; border-radius: 4px; background: #fff; }
-.number-endpoint { position: relative; z-index: 3; display: grid; width: 25px; height: 25px; place-items: center; border-radius: 50%; color: #fff; font: 700 12px Arial, sans-serif; box-shadow: 0 2px 4px #10274b22; }
+.number-endpoint { position: relative; z-index: 3; display: grid; width: 29px; height: 29px; place-items: center; border-radius: 50%; color: #fff; font: 700 18px Arial, sans-serif; }
 .endpoint-blue { background: #2f6fed; }.endpoint-orange { background: #e99835; }.endpoint-green { background: #249d7d; }.endpoint-purple { background: #8867c7; }.endpoint-coral { background: #dd665d; }
-.board-stats { display: flex; align-items: baseline; gap: 6px; color: #8192a8; font-size: 9px; }.board-stats b { color: #42658f; font-size: 10px; }.board-stats i { width: 1px; height: 10px; margin: 0 3px; background: #cbd8e8; }
-
-.numberlink-explanation { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
-.gemini-capture { display: flex; flex-direction: column; gap: 8px; min-width: 0; margin: 0; }
-.gemini-capture figcaption { display: flex; align-items: center; gap: 7px; color: #365981; font-size: 11px; font-weight: 700; }
-.gemini-capture figcaption small { padding: 2px 6px; border-radius: 8px; color: #b14939; background: #fff0ec; font-size: 8px; }
-.gemini-capture img { display: block; width: 100%; max-height: 330px; object-fit: contain; border-radius: 10px; background: #151515; box-shadow: 4px 5px 0 #c3d4eb; }
-.optimization-formulation { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 9px 12px; border: 1px solid #d0d0d0; border-radius: 4px; color: #111 !important; background: #fff !important; box-shadow: none; }
-.optimization-formulation * { color: #111 !important; background-color: #fff !important; box-shadow: none !important; }
-.optimization-formulation h2 { margin: 0 0 2px !important; color: #111; font-size: 14px !important; font-weight: 700; line-height: 1.15 !important; }
-.formulation-section h3 { margin: 2px 0 !important; color: #111; font-size: 10px !important; font-weight: 700; line-height: 1.15 !important; }
-.formulation-section p { margin: 1px 0 !important; color: #111; font-size: 8px !important; line-height: 1.15 !important; }
-.formulation-constraints { display: flex; flex-direction: column; gap: 2px; margin: 0 !important; padding-left: 16px; }
-.formulation-constraints li { padding-left: 1px; color: #111; font-size: 8px !important; line-height: 1.1 !important; }
-.formulation-constraints li::marker { font-size: 8px; }
-.formulation-constraints li b { display: block; color: #111; font-size: 8px !important; line-height: 1.1 !important; }
-.math-formula { display: block; margin: 0 auto !important; color: #111 !important; background: #fff !important; font-size: 11px !important; line-height: 1 !important; }
-.compact-formula { font-size: 10px !important; }
-.formulation-constraints small { display: block; color: #111; font-size: 7px !important; line-height: 1.1 !important; }
-.formulation-footer { margin: 0 !important; padding-top: 2px; color: #111; font-size: 8px !important; line-height: 1.1 !important; text-align: center; }
-.gemini-coordinate-note { max-width: 300px; margin: 0; color: #6e7f93; font-size: 8px; line-height: 1.4; text-align: center; }
-.rules-example { display: grid; grid-template-columns: minmax(0, 1fr) minmax(105px, .65fr); align-items: center; gap: 12px; }
-.rules-panel h2, .example-panel h2 { margin: 0 0 7px; color: #365981; font-size: 11px; }
-.example-grid { position: relative; box-sizing: border-box; display: grid; width: min(100%, 132px); aspect-ratio: 1; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-rows: repeat(4, minmax(0, 1fr)); gap: 3px; padding: 6px; border-radius: 8px; background: #dce7f7; }
-.example-panel h2 { display: flex; align-items: center; gap: 6px; }.example-panel h2 small { padding: 2px 5px; border-radius: 8px; color: #577392; background: #eaf1fb; font-size: 8px; font-weight: 600; }
+.numberlink-explanation { min-width: 0; }
+.gemini-capture { display: flex; flex-direction: column; gap: 12px; min-width: 0; margin: 0; }
+.gemini-capture figcaption { color: #365981; font-size: 16px; font-weight: 700; }
+.gemini-capture img { display: block; width: 100%; max-height: 350px; object-fit: contain; border-radius: 10px; background: #151515; }
+.optimization-formulation { display: flex; flex-direction: column; gap: 10px; min-width: 0; padding: 14px 18px; border: 1px solid #d0d0d0; border-radius: 7px; color: #111; background: #fff; }
+.optimization-formulation h2 { margin: 0; color: #111; font-size: 21px; line-height: 1.3; }
+.formulation-tabs { display: flex; gap: 8px; }
+.formulation-tabs button { padding: 7px 10px; border: 1px solid #aaa; border-radius: 5px; color: #222; background: #fff; font-size: 13px; cursor: pointer; }
+.formulation-tabs button[aria-pressed="true"] { border-color: #333; background: #ededed; font-weight: 700; }
+.formulation-tabs button:focus-visible { outline: 2px solid #333; outline-offset: 2px; }
+.formulation-section h3 { margin: 0 0 4px; color: #111; font-size: 15px; line-height: 1.4; }
+.formulation-variables p { margin: 0; color: #111; font-size: 13px; line-height: 1.6; }
+.formulation-constraints { margin: 0; padding: 0; list-style: none; }
+.formulation-constraints li { min-height: 140px; color: #111; font-size: 14px; line-height: 1.5; }
+.formulation-constraints li b { display: block; color: #111; font-size: 15px; line-height: 1.5; }
+.math-formula { display: block; margin: 8px auto; color: #111; font-size: 20px; }
+.compact-formula { font-size: 18px; }
+.formulation-constraints small { display: block; color: #333; font-size: 13px; line-height: 1.5; }
+.formulation-footer { margin: 0; padding-top: 8px; border-top: 1px solid #ddd; color: #333; font-size: 13px; line-height: 1.5; }
+.rules-example { display: grid; grid-template-columns: minmax(0, 1fr) 132px; align-items: center; gap: 20px; }
+.rules-panel h2, .example-panel h2 { margin: 0 0 16px; color: #365981; font-size: 22px; }
+.example-grid { position: relative; box-sizing: border-box; display: grid; width: 132px; aspect-ratio: 1; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-rows: repeat(4, minmax(0, 1fr)); gap: 3px; padding: 6px; border-radius: 8px; background: #dce7f7; }
 .example-cell { display: grid; place-items: center; border: 1px solid #d3dfef; border-radius: 3px; background: #fff; }
-.example-endpoint { position: relative; z-index: 3; display: grid; width: 19px; height: 19px; place-items: center; border-radius: 50%; color: #fff; font: 700 9px Arial, sans-serif; }
-
-.numberlink-rules { display: flex; flex-direction: column; gap: 5px; }
-.numberlink-rules > div { display: grid; grid-template-columns: 27px 1fr; align-items: center; min-height: 27px; padding: 3px 8px; border-radius: 6px; background: #eaf1fb; }
-.numberlink-rules b { color: #2f6fed; font: 700 9px Arial, sans-serif; }.numberlink-rules span { color: #4f6c90; font-size: 9px; }
-.numberlink-methods { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.numberlink-methods article { padding: 8px 9px; border: 1px solid #d9e4f2; border-radius: 7px; background: #fff; }
-.numberlink-methods .solver-method { border-color: #aac6e8; background: #f7fbff; }
-.numberlink-methods header { display: flex; align-items: center; gap: 6px; }.numberlink-methods header b { color: #31547e; font-size: 8px; }
-.method-dot { width: 6px; height: 6px; border-radius: 50%; background: #df8e48; }.solver-method .method-dot { background: #2f6fed; }
-.numberlink-methods p { margin: 5px 0 0; color: #6f839e; font-size: 7px; line-height: 1.5; }
-
-@media (max-width: 800px) { .numberlink-layout { grid-template-columns: 1fr; }.rules-example { grid-template-columns: 1fr 132px; }.numberlink-methods { grid-template-columns: 1fr; } }
+.example-endpoint { position: relative; z-index: 3; display: grid; width: 22px; height: 22px; place-items: center; border-radius: 50%; color: #fff; font: 700 13px Arial, sans-serif; }
+.numberlink-rules { display: flex; flex-direction: column; gap: 16px; }
+.numberlink-rules > div { display: grid; grid-template-columns: 24px 1fr; align-items: baseline; gap: 10px; }
+.numberlink-rules b { color: #2f6fed; font: 700 13px Arial, sans-serif; }
+.numberlink-rules span { color: #365981; font-size: 17px; line-height: 1.55; }
 </style>

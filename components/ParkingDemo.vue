@@ -132,18 +132,18 @@ function clearObstacles() {
       <div class="parking-status" aria-live="polite">
         <template v-if="solved">
           <strong>{{ pairCount }}<small>枠</small></strong>
-          <span>最大で {{ pairCount }} 台分。<b v-if="unmatchedCount">空き{{ unmatchedCount }}マス</b></span>
+          <span>最大 {{ pairCount }} 台分<b v-if="unmatchedCount">空き{{ unmatchedCount }}マス</b></span>
         </template>
         <template v-else>
           <strong>{{ obstacleCount }}<small>個</small></strong>
-          <span>障害物 {{ obstacleCount }} 個 · 空き{{ openCount }}マス</span>
+          <span>空き{{ openCount }}マス</span>
         </template>
       </div>
       <div class="parking-actions">
         <button class="clear-button" type="button" @click="clearObstacles">障害物クリア</button>
         <button class="solve-button" type="button" @click="solve">最適化を実行 <span>↗</span></button>
       </div>
-      <p class="parking-instruction">マスをクリックして障害物を配置できます。縦・横どちら向きにも置けます。</p>
+      <p class="parking-instruction">1台は縦・横の2マス。<br>クリックで障害物を置く・消す。</p>
     </div>
   </div>
 </template>
@@ -160,8 +160,8 @@ function clearObstacles() {
 .parking-cell.paired .cell-mark { opacity: 0; }
 .car-icon { position: absolute; top: 0; left: 0; width: calc(200% + 4px); height: 100%; overflow: visible; pointer-events: none; }
 .car-icon.vertical { width: 100%; height: calc(200% + 4px); }
-.parking-controls { display: flex; flex-direction: column; align-items: stretch; gap: 18px; }.parking-status { display: flex; align-items: center; gap: 14px; min-height: 64px; padding-bottom: 13px; border-bottom: 1px solid #d5e1f2; }.parking-status strong { color: #2867c2; font: 700 35px Arial,sans-serif; }.parking-status strong small { padding-left: 4px; font-size: 14px; }.parking-status span { color: #6d83a2; font-size: 12px; line-height: 1.6; }.parking-status b { display: block; color: #5275a3; font-weight: 500; }
-.parking-actions { display: flex; flex-direction: column; gap: 9px; }.parking-actions button { min-height: 43px; padding: 10px 14px; cursor: pointer; font-family: inherit; font-weight: 600; font-size: 13px; }.clear-button { border: 1px solid #c6d5ed; color: #45658b; background: transparent; }.clear-button:hover { background: #ffffff; }.solve-button { display: flex; justify-content: space-between; align-items: center; border: 1px solid #2f6fed; color: #ffffff; background: #2f6fed; box-shadow: 4px 4px 0 #c5d9fa; }.solve-button:hover { background: #2457bd; }.solve-button span { color: #c2e0ff; font-size: 17px; }
-.parking-instruction { margin: 0; color: #6d83a2; font-size: 11px; line-height: 1.7; }
+.parking-controls { display: flex; flex-direction: column; align-items: stretch; gap: 18px; }.parking-status { display: flex; align-items: center; gap: 14px; min-height: 64px; padding-bottom: 13px; border-bottom: 1px solid #d5e1f2; }.parking-status strong { color: #2867c2; font: 700 35px Arial,sans-serif; }.parking-status strong small { padding-left: 4px; font-size: 14px; }.parking-status span { color: #6d83a2; font-size: 17px; line-height: 1.6; }.parking-status b { display: block; color: #5275a3; font-weight: 500; }
+.parking-actions { display: flex; flex-direction: column; gap: 9px; }.parking-actions button { min-height: 43px; padding: 10px 14px; cursor: pointer; font-family: inherit; font-weight: 600; font-size: 18px; }.clear-button { border: 1px solid #c6d5ed; color: #45658b; background: transparent; }.clear-button:hover { background: #ffffff; }.solve-button { display: flex; justify-content: space-between; align-items: center; border: 1px solid #2f6fed; color: #ffffff; background: #2f6fed; box-shadow: 4px 4px 0 #c5d9fa; }.solve-button:hover { background: #2457bd; }.solve-button span { color: #c2e0ff; font-size: 17px; }
+.parking-instruction { margin: 0; color: #6d83a2; font-size: 16px; line-height: 1.7; }
 @media (max-width: 800px) { .parking-demo { grid-template-columns: 1fr; gap: 20px; }.parking-controls { display: grid; grid-template-columns: 1fr 1fr; align-items: center; }.parking-status,.parking-instruction { grid-column: 1 / -1; } }
 </style>

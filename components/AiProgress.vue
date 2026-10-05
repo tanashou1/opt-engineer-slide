@@ -70,64 +70,41 @@ const dateTicks = [
 ]
 const humans = [
   { score: 3087, label: 'chokudai · 3,087', color: '#ff0000' },
-  { score: 2200, label: 'm_m · 2,200', color: '#c0c000' },
-  { score: 2012, label: 'tanashou1 · 2,012', color: '#c0c000' },
+  { score: 2200, label: 'm_m · 2,200', color: '#c0c000', labelOffset: -9 },
+  { score: 2012, label: 'tanashou1 · 2,012', color: '#c0c000', labelOffset: 10 },
   { score: 1300, label: '競技者平均 · 1,300', color: '#00c0c0' },
   { score: 600, label: 'ITエンジニア平均 · 600', color: '#804000' },
 ]
 
-const labelOverrides: Record<string, { offset: number }> = {
-  'Claude 4.8 Opus high': { offset: 5 },
-  'Claude Fable 5 high': { offset: -4 },
-}
 const displayName = (name: string) => name.replace(/\s+(?:low|medium|high|xhigh|max)$/i, '')
-
+// Keep every data point, and label each family's latest visible model.
 const modelLabels = computed(() => {
   const placed: { left: number; right: number; top: number; bottom: number }[] = []
-  const offsets = [3, -5, 8, -10, 13, -15, 18, -20, 23, -25]
-  const points = visible.value.flatMap(group => group.points.map((point, index) => ({
+  const points = visible.value.flatMap(group => group.points.slice(-1).map(point => ({
     ...point,
     color: group.color,
-    mutedColor: group.mutedColor,
-    latest: index === group.points.length - 1,
     pointX: x(point.date),
     pointY: y(point.score),
     displayName: displayName(point.name),
-    width: displayName(point.name).length * 5.4 + 4,
-  }))).sort((a, b) => a.pointX - b.pointX || a.pointY - b.pointY)
-  const fixedPositions = new Map<string, { labelX: number; labelY: number; anchor: 'start' }>()
-  for (const point of points) {
-    const override = labelOverrides[point.name]
-    if (!override) continue
-    const labelX = point.pointX + 7
-    const labelY = Math.max(top + 8, Math.min(bottom - 2, point.pointY + override.offset))
-    placed.push({ left: labelX - 3, right: labelX + point.width + 3, top: labelY - 8, bottom: labelY + 2 })
-    fixedPositions.set(point.name, { labelX, labelY, anchor: 'start' })
-  }
-
+    width: displayName(point.name).length * 8.1 + 8,
+  }))).sort((a, b) => a.pointY - b.pointY)
   return points.map(point => {
-    const fixed = fixedPositions.get(point.name)
-    if (fixed) return { ...point, ...fixed }
-
-    const anchor = 'start'
-    const labelX = point.pointX + 7
-    const leftEdge = labelX
-    const rightEdge = labelX + point.width
-    let best = { baseline: Math.max(top + 8, Math.min(bottom - 2, point.pointY - 9)), overlap: Infinity }
-    for (const offset of offsets) {
+    const anchor = point.pointX + point.width + 12 > right ? 'end' : 'start'
+    const labelX = point.pointX + (anchor === 'end' ? -9 : 9)
+    const leftEdge = anchor === 'end' ? labelX - point.width : labelX
+    const rightEdge = anchor === 'end' ? labelX : labelX + point.width
+    let labelY = point.pointY - 12
+    for (const offset of [-12, 24, -32, 44]) {
       const baseline = point.pointY + offset
-      if (baseline < top + 8 || baseline > bottom - 2) continue
-      const box = { left: leftEdge - 3, right: rightEdge + 3, top: baseline - 8, bottom: baseline + 2 }
-      const overlap = placed.reduce((sum, other) => {
-        const dx = Math.max(0, Math.min(box.right, other.right) - Math.max(box.left, other.left))
-        const dy = Math.max(0, Math.min(box.bottom, other.bottom) - Math.max(box.top, other.top))
-        return sum + dx * dy
-      }, 0)
-      if (overlap < best.overlap) best = { baseline, overlap }
-      if (overlap === 0) break
+      if (baseline < top + 16 || baseline > bottom - 2) continue
+      const box = { left: leftEdge, right: rightEdge, top: baseline - 16, bottom: baseline + 4 }
+      if (placed.every(other => box.right < other.left || box.left > other.right || box.bottom < other.top || box.top > other.bottom)) {
+        labelY = baseline
+        break
+      }
     }
-    placed.push({ left: leftEdge - 3, right: rightEdge + 3, top: best.baseline - 8, bottom: best.baseline + 2 })
-    return { ...point, labelX, labelY: best.baseline, anchor }
+    placed.push({ left: leftEdge, right: rightEdge, top: labelY - 16, bottom: labelY + 4 })
+    return { ...point, labelX, labelY, anchor }
   })
 })
 
@@ -160,14 +137,14 @@ onUnmounted(stop)
 <template>
   <div class="ai-progress">
     <div class="ai-chart-wrap">
-      <svg class="ai-chart" viewBox="0 0 940 300" role="img" aria-label="縦軸0からのALE-Bench Long問題の平均Performanceと人間のレート目安をモデル公開日ごとに表示したグラフ">
+      <svg class="ai-chart" viewBox="0 0 1040 300" role="img" aria-label="縦軸0からのALE-Bench Long問題の平均Performanceと人間のレート目安をモデル公開日ごとに表示したグラフ">
         <g v-for="tick in ticks" :key="tick">
           <line :x1="left" :x2="right" :y1="y(tick)" :y2="y(tick)" class="ai-grid" />
           <text x="43" :y="y(tick) + 4" class="ai-axis-number" text-anchor="end">{{ tick.toLocaleString() }}</text>
         </g>
         <g v-for="human in humans" :key="human.score">
           <line :x1="left" :x2="right" :y1="y(human.score)" :y2="y(human.score)" :stroke="human.color" stroke-width="1.5" stroke-dasharray="5 5" opacity=".8" />
-          <text x="842" :y="y(human.score)+3" class="ai-human-label" :fill="human.color">{{ human.label }}</text>
+          <text x="842" :y="y(human.score)+(human.labelOffset ?? 3)" class="ai-human-label" :fill="human.color">{{ human.label }}</text>
         </g>
         <g v-for="tick in dateTicks" :key="tick[0]">
           <line :x1="x(tick[0])" :x2="x(tick[0])" :y1="bottom" :y2="bottom+5" stroke="#9aabc0" />
@@ -177,7 +154,7 @@ onUnmounted(stop)
         <g v-for="group in visible" :key="group.name">
           <path v-if="group.points.length > 1" :d="path(group.points)" fill="none" :stroke="group.color" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity=".75" />
         </g>
-        <text v-for="point in modelLabels" v-show="showModelLabels" :key="point.name" :x="point.labelX" :y="point.labelY" :text-anchor="point.anchor" :fill="point.latest ? point.color : point.mutedColor" class="ai-model-label">{{ point.displayName }}</text>
+        <text v-for="point in modelLabels" v-show="showModelLabels" :key="point.name" :x="point.labelX" :y="point.labelY" :text-anchor="point.anchor" :fill="point.color" class="ai-model-label">{{ point.displayName }}</text>
         <g v-for="group in visible" :key="`${group.name}-points`">
           <circle v-for="point in group.points" :key="point.name" :cx="x(point.date)" :cy="y(point.score)" r="4.5" :fill="group.color" stroke="white" stroke-width="2" />
         </g>
@@ -194,30 +171,30 @@ onUnmounted(stop)
         </button>
       </div>
     </div>
-    <div class="ai-source">出典: <a href="https://sakanaai.github.io/ALE-Bench-Leaderboard/" target="_blank" rel="noopener noreferrer">ALE-Bench Leaderboard</a>（2026-09-24、Self-refine ×16、Long）</div>
+    <div class="ai-source">出典: <a href="https://sakanaai.github.io/ALE-Bench-Leaderboard/" target="_blank" rel="noopener noreferrer">ALE-Bench Leaderboard</a>（2026-09-24 · Self-refine ×16 · Long）</div>
   </div>
 </template>
 
 <style scoped>
 .ai-progress { font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif; }
-.ai-chart-wrap { height: 305px; padding: 4px 4px 0; border: 1px solid #d6e2f0; border-radius: 13px; background: #fff; }
+.ai-chart-wrap { height: 315px; padding: 4px 4px 0; border: 1px solid #d6e2f0; border-radius: 13px; background: #fff; }
 .ai-chart { display: block; width: 100%; height: 100%; }
 .ai-grid { stroke: #e4eaf2; stroke-width: 1; }
-.ai-axis-number,.ai-axis-date { fill: #7488a2; font: 11px Arial, sans-serif; }
-.ai-human-label { font: 700 9px 'Noto Sans JP', sans-serif; }
-.ai-model-label { font: 700 9px 'Noto Sans JP', Arial, sans-serif; paint-order: stroke; stroke: #fff; stroke-width: 1.25px; stroke-linejoin: round; pointer-events: none; }
-.ai-controls { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
-.ai-play { flex: none; border: 0; border-radius: 7px; padding: 7px 12px; color: #fff; background: #2f6fed; font-size: 11px; font-weight: 700; cursor: pointer; }
-.ai-label-toggle { flex: none; border: 1px solid #b9cbe1; border-radius: 7px; padding: 6px 9px; color: #345476; background: #fff; font-size: 10px; font-weight: 700; cursor: pointer; }
+.ai-axis-number,.ai-axis-date { fill: #7488a2; font: 15px Arial, sans-serif; }
+.ai-human-label { font: 700 16px 'Noto Sans JP', sans-serif; }
+.ai-model-label { font: 700 16px 'Noto Sans JP', Arial, sans-serif; paint-order: stroke; stroke: #fff; stroke-width: 1.25px; stroke-linejoin: round; pointer-events: none; }
+.ai-controls { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+.ai-play { flex: none; border: 0; border-radius: 7px; padding: 7px 12px; color: #fff; background: #2f6fed; font-size: 14px; font-weight: 700; cursor: pointer; }
+.ai-label-toggle { flex: none; border: 1px solid #b9cbe1; border-radius: 7px; padding: 6px 9px; color: #345476; background: #fff; font-size: 13px; font-weight: 700; cursor: pointer; }
 .ai-label-toggle[aria-pressed="false"] { color: #8494a7; background: #f3f6fa; }
 .ai-label-toggle:focus-visible { outline: 2px solid #2f6fed; outline-offset: 2px; }
 .ai-slider { flex: 1; accent-color: #2f6fed; }
-.ai-date { width: 48px; color: #345476; font: 700 11px Arial, sans-serif; }
-.ai-legend { display: flex; gap: 11px; color: #536b88; font-size: 10px; white-space: nowrap; }
+.ai-date { width: 60px; color: #345476; font: 700 14px Arial, sans-serif; }
+.ai-legend { display: flex; gap: 11px; color: #536b88; font-size: 13px; white-space: nowrap; }
 .ai-legend-button { display: flex; align-items: center; gap: 4px; padding: 0; border: 0; color: inherit; background: transparent; font: inherit; cursor: pointer; }
 .ai-legend-button[aria-pressed="false"] { opacity: .38; text-decoration: line-through; }
 .ai-legend-button:focus-visible { outline: 2px solid #2f6fed; outline-offset: 3px; border-radius: 3px; }
 .ai-legend i { width: 7px; height: 7px; border-radius: 50%; }
-.ai-source { margin-top: 5px; color: #8494a7; font-size: 9px; }
+.ai-source { margin-top: 5px; color: #8494a7; font-size: 12px; }
 .ai-source a { color: #496c9c; text-decoration: underline; }
 </style>
