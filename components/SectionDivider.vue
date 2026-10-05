@@ -3,17 +3,66 @@ defineProps({
   number: { type: String, required: true },
   title: { type: String, required: true },
 })
+
+const surfaceSteps = 18
+const surfaceTicks = Array.from({ length: surfaceSteps + 1 }, (_, index) => -1 + 2 * index / surfaceSteps)
+const surfacePalette = [
+  [15, 38, 96],
+  [23, 62, 126],
+  [34, 88, 157],
+  [57, 119, 184],
+  [116, 163, 216],
+]
+const surfaceHeight = (x, y) => Math.cos(3 * Math.PI * x)
+  + .78 * Math.cos(3 * Math.PI * y + .55)
+  + .27 * Math.sin(2 * Math.PI * (x + .65 * y))
+  + .32 * Math.exp(-((x + .42) ** 2 + (y - .25) ** 2) / .18)
+  - .26 * Math.exp(-((x - .45) ** 2 + (y + .36) ** 2) / .13)
+const projectSurface = (x, y) => {
+  const z = surfaceHeight(x, y)
+  return { x: 280 + 120 * (x - y), y: 270 + 74 * (x + y) - 30 * z, z }
+}
+const pointText = point => `${point.x.toFixed(1)},${point.y.toFixed(1)}`
+const surfaceFrame = `${[[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([x, y], index) => `${index ? 'L' : 'M'}${pointText(projectSurface(x, y))}`).join(' ')}Z`
+function surfaceColor(height) {
+  const position = Math.max(0, Math.min(3.999, (height + 2.5) / 5 * 4))
+  const stop = Math.floor(position)
+  const fraction = position - stop
+  const channels = surfacePalette[stop].map((channel, index) => Math.round(channel + (surfacePalette[stop + 1][index] - channel) * fraction))
+  return `rgb(${channels.join(',')})`
+}
+
+const surfaceCells = []
+for (let row = 0; row < surfaceSteps; row++) {
+  for (let column = 0; column < surfaceSteps; column++) {
+    const x0 = surfaceTicks[column]
+    const x1 = surfaceTicks[column + 1]
+    const y0 = surfaceTicks[row]
+    const y1 = surfaceTicks[row + 1]
+    const corners = [[x0, y0], [x1, y0], [x1, y1], [x0, y1]].map(([x, y]) => projectSurface(x, y))
+    const averageHeight = corners.reduce((sum, point) => sum + point.z, 0) / corners.length
+    surfaceCells.push({
+      id: `${row}-${column}`,
+      depth: (x0 + x1 + y0 + y1) / 4,
+      points: corners.map(pointText).join(' '),
+      fill: surfaceColor(averageHeight),
+    })
+  }
+}
+surfaceCells.sort((a, b) => a.depth - b.depth)
+
+const surfaceMesh = []
+for (let index = 0; index <= surfaceSteps; index++) {
+  const tick = surfaceTicks[index]
+  const alongX = surfaceTicks.map(value => pointText(projectSurface(tick, value))).join(' ')
+  const alongY = surfaceTicks.map(value => pointText(projectSurface(value, tick))).join(' ')
+  surfaceMesh.push({ id: `x-${index}`, points: alongX }, { id: `y-${index}`, points: alongY })
+}
 </script>
 
 <template>
   <div class="section-divider" :class="`section-divider-${number}`">
     <svg class="section-divider-pattern" viewBox="0 0 560 520" aria-hidden="true">
-      <defs>
-        <linearGradient id="optimization-surface-fill" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stop-color="#8cb8ff" stop-opacity=".26" />
-          <stop offset="1" stop-color="#8cb8ff" stop-opacity=".015" />
-        </linearGradient>
-      </defs>
       <g v-if="number === '00'" class="pattern-intro">
         <g transform="rotate(-5 280 260)">
           <rect class="profile-card-outline" x="85" y="83" width="390" height="344" rx="22" />
@@ -36,18 +85,11 @@ defineProps({
       </g>
 
       <g v-else-if="number === '01'" class="pattern-surface">
-        <path class="surface-fill" d="M48 344C91 329 126 292 158 235C190 178 225 171 252 210C278 248 275 292 315 301C355 310 378 249 406 204C433 165 470 181 488 222C505 263 482 309 520 344L520 402H48Z" />
-        <path class="surface-mesh" d="M48 344C91 329 126 292 158 235C190 178 225 171 252 210C278 248 275 292 315 301C355 310 378 249 406 204C433 165 470 181 488 222C505 263 482 309 520 344" />
-        <path class="surface-mesh" d="M48 360C93 345 130 312 163 258C196 207 230 202 257 238C283 272 282 306 319 315C360 324 384 270 411 231C437 194 469 208 485 244C501 280 483 324 520 360" />
-        <path class="surface-mesh" d="M48 378C94 363 133 332 168 283C201 236 234 230 261 264C286 294 289 322 323 332C365 343 390 291 416 255C441 221 468 234 482 267C497 299 483 342 520 378" />
-        <path class="surface-mesh" d="M93 330C121 309 149 273 177 226C205 181 232 183 256 220C278 255 279 294 315 303C351 312 380 257 406 214C430 176 456 181 477 217" />
-        <path class="surface-mesh" d="M148 308C171 283 191 248 213 211C231 181 247 194 263 228C280 265 285 296 317 304C351 312 380 271 402 235C422 203 441 196 462 221" />
-        <path class="surface-contour" d="M112 300C149 280 161 228 195 204C221 185 244 203 248 231C253 262 223 289 191 305C159 321 128 320 112 300Z" />
-        <path class="surface-contour" d="M143 287C171 270 178 236 199 220C217 206 231 216 233 235C235 255 215 273 190 286C169 297 151 299 143 287Z" />
-        <path class="surface-contour" d="M366 278C397 252 408 204 438 195C461 188 478 208 474 233C469 261 438 286 407 296C385 303 369 295 366 278Z" />
-        <path class="surface-route" d="M103 354C147 345 164 302 189 277C218 248 246 275 267 294C285 311 296 311 316 303" />
-        <circle class="surface-start" cx="103" cy="354" r="6" />
-        <circle class="surface-optimum" cx="316" cy="303" r="8" />
+        <polygon v-for="cell in surfaceCells" :key="cell.id" class="surface-cell" :points="cell.points" :fill="cell.fill" />
+        <polyline v-for="line in surfaceMesh" :key="line.id" class="surface-mesh" :points="line.points" />
+        <path class="surface-frame" :d="surfaceFrame" />
+        <text class="surface-axis-label" x="526" y="344">x</text>
+        <text class="surface-axis-label" x="26" y="344">y</text>
       </g>
 
       <g v-else-if="number === '02'" class="pattern-contest" transform="rotate(-10 280 260)">

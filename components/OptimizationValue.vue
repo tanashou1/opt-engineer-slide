@@ -8,27 +8,36 @@ withDefaults(defineProps<{
 <template>
   <section class="optimization-value" :class="`value-${view}`">
     <template v-if="view === 'overview'">
-      <div class="overview-panels">
-        <article class="panel implementation-panel">
-          <p class="panel-label">AIで速くなる作業</p>
-          <h2>調べる・書く・試す</h2>
-          <ul class="plain-list">
-            <li>モデルのコード化</li>
-            <li>アルゴリズムの実装</li>
-            <li>実験・可視化・調査</li>
-          </ul>
+      <div class="role-map" aria-label="数理最適化専門家の価値を支える5つの役割">
+        <svg class="role-map-connectors" viewBox="0 0 884 380" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M442 119V100M332 190H274M552 190H610M399 261L380 280M485 261L504 280" />
+        </svg>
+        <article class="role-map-card role-map-card-1">
+          <span class="role-map-number">01</span>
+          <div><h2>解くべき問題を設計する</h2><p>何をモデル化するかを決める</p></div>
         </article>
-        <article class="panel decision-panel">
-          <p class="panel-label">専門家が設計する判断</p>
-          <h2>何を解き、どう良くするか</h2>
-          <ul class="plain-list">
-            <li><b>何を解くか</b><span>問題・モデルを選ぶ</span></li>
-            <li><b>何を良しとするか</b><span>評価を作る</span></li>
-            <li><b>どこを変えるか</b><span>改善の方向を決める</span></li>
-          </ul>
+        <article class="role-map-card role-map-card-2">
+          <span class="role-map-number">02</span>
+          <div><h2>評価系を設計する</h2><p>何を「良い」とするかを決める</p></div>
         </article>
+        <article class="role-map-card role-map-card-3">
+          <span class="role-map-number">03</span>
+          <div><h2>ボトルネックを診断する</h2><p>成果を妨げる原因を見つける</p></div>
+        </article>
+        <article class="role-map-card role-map-card-4">
+          <span class="role-map-number">04</span>
+          <div><h2>現実側を変えて問題を簡単にする</h2><p>必要な条件を保ち、ルールを見直す</p></div>
+        </article>
+        <article class="role-map-card role-map-card-5">
+          <span class="role-map-number">05</span>
+          <div><h2>専門性でAIを検証・誘導する</h2><p>正しさを見極め、次の探索を導く</p></div>
+        </article>
+        <div class="role-map-core">
+          <span>5つの役割を支える</span>
+          <strong>数理最適化<br>専門家の価値</strong>
+          <small>AIを現実の成果につなげる</small>
+        </div>
       </div>
-      <p class="takeaway">専門知識で、AIが試す範囲と採用基準を設計する。</p>
     </template>
 
     <template v-else-if="view === 'problem'">
@@ -145,15 +154,27 @@ withDefaults(defineProps<{
 .optimization-value p { margin: 0; line-height: 1.6; }
 .panel { padding: 20px 22px; border: 1px solid #d0dced; border-radius: 12px; background: #fff; }
 .optimization-value .panel-label { margin: 0 0 12px; color: #547193; font-size: 16px; font-weight: 700; }
-.overview-panels { display: grid; grid-template-columns: 1fr 1.1fr; gap: 16px; }
-.overview-panels .panel { min-height: 257px; padding: 25px 24px; }
-.implementation-panel h2 { color: #527195; }
-.decision-panel { border-color: #a9c7ef; background: #eaf2ff; }
-.decision-panel h2 { color: #245ab1; }
-.plain-list { display: flex; flex-direction: column; gap: 18px; margin: 24px 0 0; padding: 0; list-style: none; font-size: 18px; }
-.plain-list li { margin: 0; padding: 0; }
-.decision-panel li { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
-.decision-panel li span { color: #5d7697; font-size: 16px; }
+.optimization-value.value-overview { display: block; height: 380px; }
+.role-map { position: relative; width: 100%; height: 380px; }
+.role-map-connectors { position: absolute; z-index: 0; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.role-map-connectors path { fill: none; stroke: #9db9dd; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 6 7; }
+.role-map-card { position: absolute; z-index: 1; display: grid; grid-template-columns: 34px minmax(0, 1fr); align-items: center; gap: 10px; min-height: 100px; box-sizing: border-box; padding: 12px 14px; border: 1px solid #d0dced; border-left: 5px solid #5a88c4; border-radius: 12px; background: #fff; box-shadow: 0 6px 16px #17385d12; }
+.role-map-card-1 { top: 0; left: 50%; width: 48%; transform: translateX(-50%); }
+.role-map-card-2 { top: 50%; right: 0; width: 31%; transform: translateY(-50%); }
+.role-map-card-3 { right: 6%; bottom: 0; width: 37%; border-left-color: #5b91c7; }
+.role-map-card-4 { bottom: 0; left: 6%; width: 37%; border-left-color: #648dbd; }
+.role-map-card-5 { top: 50%; left: 0; width: 31%; transform: translateY(-50%); border-left-color: #3e72b3; }
+.role-map-number { display: grid; width: 32px; height: 32px; place-items: center; border-radius: 50%; color: #245897; background: #e6effb; font: 800 13px/1 Arial, sans-serif; }
+.role-map-card h2 { margin: 0; color: #1d426f; font-size: 16px; line-height: 1.35; }
+.role-map-card p { margin: 4px 0 0; color: #617795; font-size: 13px; line-height: 1.4; }
+.role-map-card-2 .role-map-number { color: #fff; background: #5684bc; }
+.role-map-card-3 .role-map-number { color: #fff; background: #648dbd; }
+.role-map-card-4 .role-map-number { color: #fff; background: #7097c2; }
+.role-map-card-5 .role-map-number { color: #fff; background: #3e72b3; }
+.role-map-core { position: absolute; z-index: 2; top: 50%; left: 50%; display: flex; width: 220px; height: 142px; box-sizing: border-box; flex-direction: column; align-items: center; justify-content: center; padding: 13px 12px; transform: translate(-50%, -50%); border: 1px solid #7398c4; border-radius: 18px; color: #fff; background: linear-gradient(145deg, #10274b, #22529a); box-shadow: 0 0 0 6px #f3f7fd, 0 0 0 8px #b5cbe7, 0 10px 22px #17385d24; text-align: center; }
+.role-map-core span { margin-bottom: 5px; color: #b8d4f4; font-size: 12px; font-weight: 700; }
+.role-map-core strong { font-size: 19px; line-height: 1.3; }
+.role-map-core small { margin-top: 6px; color: #d2e2f6; font-size: 10px; }
 .optimization-value .takeaway { padding: 12px 18px; border-left: 4px solid #2f6fed; border-radius: 0 8px 8px 0; color: #244b80; background: #e6effb; font-size: 20px; font-weight: 700; line-height: 1.5; }
 .model-choices { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
 .model-choices > div { padding: 13px 14px; border-top: 3px solid #5689d2; background: #e7effb; }

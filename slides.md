@@ -63,15 +63,15 @@ class: agenda-slide
 title: 目次
 ---
 
-<DeckHeader chapter="目次" />
+<DeckHeader chapter="目次・今日の目的" />
 <div class="talk-scope">
   <section class="talk-scope-card talk-scope-agenda">
     <h2>目次</h2>
     <ol start="0">
       <li>自己紹介</li>
       <li>数理最適化とは</li>
-      <li>数理最適化（競技プログラミング）の問題紹介</li>
-      <li>AI時代における数理最適化エンジニアの役割</li>
+      <li>数理最適化（競技プログラミング）<br>の問題紹介</li>
+      <li>AI時代における<br>数理最適化エンジニアの役割</li>
     </ol>
   </section>
   <div class="talk-scope-stack">
@@ -113,7 +113,7 @@ title: 数理最適化の役割
 ---
 
 <DeckHeader chapter="1 数理最適化とは" subtitle="数理最適化の役割" title="生成AI時代の素朴な疑問" />
-<div class="role-question"><p>数理最適化は、目的と制約を表し、条件を守る解を探す。</p><p>全ての問題、生成AIに任せられるのでは？</p></div>
+<div class="role-question"><p>生成AIは、いろいろな問題が解けるようになっている</p><p>数理最適化の問題も、全て生成AIに任せられるのでは？</p></div>
 
 ---
 class: ai-optimization-slide
@@ -123,17 +123,7 @@ title: ナンバーリンクを解く
 <DeckHeader chapter="1 数理最適化とは" subtitle="AI vs 数理最適化" title="同じ盤面を、2つの方法で解く" />
 
 <NumberlinkChallenge />
-
----
-class: solver-summary-slide
-title: 制約を厳密に守り、最適な答えを出すには、数理最適化が適している
----
-
-<DeckHeader chapter="1 数理最適化とは" subtitle="ナンバーリンクの結論" title="制約を厳密に守り、最適な答えを出すには、数理最適化が適している" />
-<div class="solver-summary">
-  <section class="solver-summary-card"><h2>生成AIに直接解かせる</h2><p>答えをすぐ提案できる。条件の見落としや、最適性を確認できないことがある。</p></section>
-  <section class="solver-summary-card"><h2>数理最適化で解く</h2><p>条件を制約として明示し、条件を満たす解を探す。最適性を証明できれば、最善の解だと確認できる。</p></section>
-</div>
+<div v-click class="numberlink-role-statement">制約を厳密に守り、最適な答えを出すのは、<br>数理最適化の役割</div>
 
 ---
 class: approaches-slide
@@ -193,17 +183,12 @@ title: 2色に塗り分け、最大マッチング問題として解く
 
 ---
 class: ahc-slide
-title: 変化する配送計画
+title: 厳密最適が出せない問題
 ---
 
-<DeckHeader chapter="2 数理最適化（競技プログラミング）の問題紹介" subtitle="長期AHC · 模式例" title="変化する注文に、計画を組み直す。" />
+<DeckHeader chapter="2 数理最適化（競技プログラミング）の問題紹介" subtitle="Toyota HC 2023 Spring · Container Loading" title="厳密最適が出せない問題" description="現実の課題の多くは、効率的な解法が見つかっておらず、厳密な最適解を求めるのは困難。" />
 
-<DispatchChallenge />
-
-<!--
-架空の配送設定。複数の条件を守りつつ、限られた時間で計画を改善する。
-距離38kmでも遅配3件の候補と、距離46kmで遅配0件の候補では、短さだけで採用を決められない。訪問順・担当を変え、制約を検査し、評価して更新する。
--->
+<ContainerLoading />
 
 ---
 class: section-divider-slide
@@ -225,18 +210,17 @@ title: 最適化問題における生成AIの実力
 
 ---
 class: value-slide
-title: AIで解くコストが下がる
+title: AI時代に価値が高まる5つの役割
 ---
 
-<DeckHeader chapter="3 AI時代における数理最適化エンジニアの役割" subtitle="価値の全体像" title="AIで「解くコスト」が下がる。" />
+<DeckHeader chapter="3 AI時代における数理最適化エンジニアの役割" subtitle="5つの役割" title="AI時代に価値が高まる5つの役割" />
 
 <OptimizationValue view="overview" />
 
 <!--
-原稿：contents_text/03_AI時代の数理最適化エンジニア.md
-生成AIにより、数理モデルのコード化、ソルバーAPIの実装、アルゴリズム・ヒューリスティクスの実装、実験・可視化、調査、改善案の生成が速くなる。
-実装が速くなっても、業務価値につながる問題と評価を選び、改善先を判断する必要がある。
-ここから、問題設計、評価設計、ボトルネック診断、現実側の変更、専門性による検証・誘導の5つを説明する。
+後続する5つの役割の全体像を示す。
+中心にあるのは、数理最適化の専門性を使ってAIを導き、問題・数学・現場をつなぐ価値。
+1. 解くべき問題を設計する。2. 評価系を設計する。3. ボトルネックを診断する。4. 現実側を変えて問題を簡単にする。5. 専門性でAIを検証・誘導する。
 -->
 
 ---
