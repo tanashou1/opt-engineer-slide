@@ -167,7 +167,7 @@ title: 駐車枠の配置問題
 ---
 
 <div class="parking-head">
-  <DeckHeader chapter="2 数理最適化（競技プログラミング）の問題紹介" title="駐車枠の配置問題" description="2×1マスの駐車枠を、どのように配置すると効率的か？" />
+  <DeckHeader chapter="2 数理最適化（競技プログラミング）の問題紹介" title="駐車枠の配置問題" description="2×1マスの駐車枠を、どのように配置すると効率的か、計算で求められますか？" />
   <div class="parking-legend"><span class="legend-obstacle"></span>障害物 <svg class="legend-car" viewBox="0 0 24 14" aria-hidden="true"><rect x="2" y="3" width="20" height="8" rx="4" fill="#2f6fed" /><rect x="9" y="4" width="6" height="6" rx="2" fill="#b8d9ff" /></svg>駐車した車</div>
 </div>
 <ParkingDemo />
