@@ -1,6 +1,8 @@
 # Welcome to [Slidev](https://github.com/slidevjs/slidev)!
 
-To start the slide show:
+公開スライド: <https://tanashou1.github.io/opt-engineer-slide/>
+
+To start the slide show locally:
 
 - `npm install`
 - `npm run dev`
